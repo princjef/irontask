@@ -1,0 +1,16 @@
+{
+    "compiler": {
+        "configType": "tsconfig",
+        "rootFolder": "."
+    },
+    "project": {
+        "entryPointSourceFile": "dist/index.d.ts"
+    },
+    "apiJsonFile": {
+        "enabled": true,
+        "outputFolder": "./temp/api"
+    },
+    "apiReviewFile": {
+        "enabled": false
+    }
+}
