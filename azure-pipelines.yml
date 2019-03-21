@@ -7,6 +7,15 @@ trigger:
 pr:
   - master
 
+resources:
+  containers:
+    - container: cosmos
+      image: microsoft/azure-cosmosdb-emulator:2.2.1-2b4af9b3
+      ports:
+        - 8081:8081
+      volumes:
+        - '$(Build.BinariesDirectory)\cosmos-emulator:C:\CosmosDB.Emulator\bind-mount'
+
 jobs:
   - job: commitlint
     pool:
@@ -32,14 +41,6 @@ jobs:
           nodeVersion: 11.x
     pool:
       vmImage: 'win1803'
-    resources:
-      containers:
-        - container: cosmos
-          image: microsoft/azure-cosmosdb-emulator:2.2.1-2b4af9b3
-          ports:
-            - 8081:8081
-          volumes:
-            - '$(Build.BinariesDirectory)\cosmos-emulator:C:\CosmosDB.Emulator\bind-mount'
     services:
       cosmos: cosmos
     steps:
