@@ -11,10 +11,9 @@ resources:
   containers:
     - container: cosmos
       image: microsoft/azure-cosmosdb-emulator:2.2.1-2b4af9b3
+      options: --mount "type=bind,source=$(Build.BinariesDirectory)\cosmos-emulator,destination=C:\CosmosDB.Emulator\bind-mount"
       ports:
         - 8081:8081
-      volumes:
-        - '$(Build.BinariesDirectory)\cosmos-emulator:C:\CosmosDB.Emulator\bind-mount'
 
 jobs:
   - job: commitlint
