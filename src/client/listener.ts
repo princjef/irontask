@@ -297,58 +297,63 @@ export default class ListenerImpl<T> extends EventEmitter
     // Add the task to the list of actively processed tasks.
     this._activeTasks.set(task.id, task);
 
-    await this._interceptor.processing(
-      this,
-      task,
-      this._client.documentRef(task.type, task.id),
-      async () => {
-        let finishMeta: TaskFinishMetadata = {
-          result: ProcessingResult.ForceRelease
-        };
+    try {
+      await this._interceptor.processing(
+        this,
+        task,
+        this._client.documentRef(task.type, task.id),
+        async () => {
+          let finishMeta: TaskFinishMetadata = {
+            result: ProcessingResult.ForceRelease
+          };
 
-        // We use the finished event to pull out the processing result.
-        // No matter how things finish, we will receive this event prior
-        // to finishing this handler.
-        task.once('finished', meta => (finishMeta = meta));
+          // We use the finished event to pull out the processing result.
+          // No matter how things finish, we will receive this event prior
+          // to finishing this handler.
+          task.once('finished', meta => (finishMeta = meta));
 
-        try {
           try {
-            // We let the two possible ways for task processing to
-            // finish race each other
-            await Promise.race([
-              // The task is finished/expired/deleted
-              new Promise<void>(resolve => task.once('inactive', resolve)),
-              // The handler returns
-              Promise.resolve(this._handler(task))
-            ]);
+            try {
+              // We let the two possible ways for task processing to
+              // finish race each other
+              await Promise.race([
+                // The task is finished/expired/deleted
+                new Promise<void>(resolve => task.once('inactive', resolve)),
+                // The handler returns
+                Promise.resolve(this._handler(task))
+              ]);
 
-            await this._finish(task, async () => task.complete());
+              await this._finish(task, async () => task.complete());
+            } catch (err) {
+              // We explicitly tell the task to not save the payload
+              // on throw because we don't want to accidentally save
+              // inconsistent data if the handler fails in an
+              // intermediate state.
+              await this._finish(task, async () =>
+                task.retry(err, undefined, false)
+              );
+            }
           } catch (err) {
-            // We explicitly tell the task to not save the payload
-            // on throw because we don't want to accidentally save
-            // inconsistent data if the handler fails in an
-            // intermediate state.
-            await this._finish(task, async () =>
-              task.retry(err, undefined, false)
-            );
+            // We swallow all errors at this point and force release the task so
+            // it doesn't try to keep running.
+            task.forceRelease(err);
+            // TODO: instrument?
+          } finally {
+            // Once the task is finished (success or failure), we remove it from
+            // the active tasks list.
+            this._activeTasks.delete(task.id);
+            this.emit('finishedTask', task);
           }
-        } catch (err) {
-          // We swallow all errors at this point and force release the task so
-          // it doesn't try to keep running.
-          task.forceRelease(err);
-          // TODO: instrument?
-        } finally {
-          // Once the task is finished (success or failure), we remove it from
-          // the active tasks list and check whether we need to run the
-          // locking loop.
-          this._activeTasks.delete(task.id);
-          this.emit('finishedTask', task);
-          this._pollNow();
-        }
 
-        return finishMeta;
-      }
-    );
+          return finishMeta;
+        }
+      );
+    } finally {
+      // We run the next iteration of the polling loop outside of the processing
+      // function to keep its operations separate from any handling/wrapping as
+      // part of a processing interceptor
+      this._pollNow();
+    }
   }
 
   /**
