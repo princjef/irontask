@@ -3,7 +3,7 @@
     "rules": {
         "file-header": [
             true,
-            "^!\\s*\\* Copyright \\(c\\) Microsoft Corporation\\. All rights reserved\\.\n \\* Licensed under the MIT License\\.\\s*$",
+            "^!\\s*\\* Copyright \\(c\\) Microsoft Corporation\\. All rights reserved\\.\r?\n \\* Licensed under the MIT License\\.\\s*$",
             "Copyright (c) Microsoft Corporation. All rights reserved.\nLicensed under the MIT License."
         ]
     }
