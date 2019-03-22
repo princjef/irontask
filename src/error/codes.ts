@@ -101,6 +101,13 @@ enum ErrorCode {
   INTERCEPTOR_NEXT_FUNCTION_ALREADY_CALLED = 'ERR_INTERCEPTOR_NEXT_FUNCTION_ALREADY_CALLED',
 
   /**
+   * The provided cron string interval is invalid.
+   *
+   * @public
+   */
+  INVALID_CRON_STRING_INTERVAL = 'ERR_INVALID_CRON_STRING_INTERVAL',
+
+  /**
    * The listener has been destroyed and cannot be used any more.
    *
    * @public

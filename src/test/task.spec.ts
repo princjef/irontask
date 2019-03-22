@@ -5,12 +5,11 @@
 
 import * as util from 'util';
 
-import * as uuid from 'uuid/v4';
-
 import TaskClient, {
   ErrorCode,
   Interceptors,
   IronTaskError,
+  Task,
   TaskClientOptions,
   TaskStatus
 } from '..';
@@ -376,11 +375,11 @@ describe('Task', () => {
     });
 
     it('captures information about the request', async () => {
-      const taskId = uuid();
+      let task: Task<any>;
 
       const taskInterceptor = jest.fn((async (ctx, next) => {
         expect(ctx.operation).toBe(Interceptors.TaskOperation.Save);
-        expect(ctx.task.id).toBe(taskId);
+        expect(ctx.task.id).toBe(task.id);
         expect(ctx.task.type).toBe(type);
         expect(ctx.ruConsumption).toBeUndefined();
         await next();
@@ -393,15 +392,11 @@ describe('Task', () => {
         }
       });
 
-      const task = await localClient.create(
-        type,
-        {
-          first: 'property',
-          second: 123,
-          arr: [true, false]
-        },
-        { id: taskId }
-      );
+      task = await localClient.create(type, {
+        first: 'property',
+        second: 123,
+        arr: [true, false]
+      });
 
       task.payload.first = 'updated';
       await task.save();
@@ -416,11 +411,11 @@ describe('Task', () => {
     });
 
     it('captures request errors', async () => {
-      const taskId = uuid();
+      let task: Task<any>;
 
       const taskInterceptor = jest.fn((async (ctx, next) => {
         expect(ctx.operation).toBe(Interceptors.TaskOperation.Save);
-        expect(ctx.task.id).toBe(taskId);
+        expect(ctx.task.id).toBe(task.id);
         expect(ctx.task.type).toBe(type);
         expect(ctx.ruConsumption).toBeUndefined();
         try {
@@ -441,20 +436,16 @@ describe('Task', () => {
         }
       });
 
-      const task = await localClient.create(
-        type,
-        {
-          first: 'property',
-          second: 123,
-          arr: [true, false]
-        },
-        { id: taskId }
-      );
+      task = await localClient.create(type, {
+        first: 'property',
+        second: 123,
+        arr: [true, false]
+      });
 
       task.payload.first = 'updated';
 
       // We delete from the main client so that we'll get an error
-      await client.deleteOne(type, taskId);
+      await client.deleteOne(type, task.id);
 
       try {
         await task.save();

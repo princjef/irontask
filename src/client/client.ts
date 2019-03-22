@@ -163,38 +163,42 @@ export default class TaskClient {
     payload: T,
     options?: CreateTaskOptions
   ): Promise<Task<T>> {
-    const definedOptions: CreateTaskOptions = options || {};
-
-    const now = Date.now();
-
-    const task: NewTaskDocument<T> = {
-      id: definedOptions.id !== undefined ? definedOptions.id : uuid(),
-      config: {
-        type,
-        enabled:
-          definedOptions.enabled !== undefined ? definedOptions.enabled : true,
-        createTime: now,
-        lockedUntilTime: 0,
-        nextRunTime:
-          definedOptions.scheduledTime !== undefined
-            ? definedOptions.scheduledTime.getTime()
-            : computeNextRun(definedOptions.interval),
-        deliveries: 0,
-        attempts: 0,
-        runs: 0,
-        interval: definedOptions.interval,
-        ttlMs: definedOptions.ttlMs,
-        maxExecutionTimeMs: definedOptions.maxExecutionTimeMs
-      },
-      payload
-    };
+    const id = uuid();
 
     return this._interceptor.client(
       this,
       Interceptors.TaskClientOperation.Create,
-      this._client.documentRef(task.config.type, task.id),
+      this._client.documentRef(type, id),
       type,
       async () => {
+        const definedOptions: CreateTaskOptions = options || {};
+
+        const now = Date.now();
+
+        const task: NewTaskDocument<T> = {
+          id,
+          config: {
+            type,
+            enabled:
+              definedOptions.enabled !== undefined
+                ? definedOptions.enabled
+                : true,
+            createTime: now,
+            lockedUntilTime: 0,
+            nextRunTime:
+              definedOptions.scheduledTime !== undefined
+                ? definedOptions.scheduledTime.getTime()
+                : computeNextRun(definedOptions.interval),
+            deliveries: 0,
+            attempts: 0,
+            runs: 0,
+            interval: definedOptions.interval,
+            ttlMs: definedOptions.ttlMs,
+            maxExecutionTimeMs: definedOptions.maxExecutionTimeMs
+          },
+          payload
+        };
+
         const response = await this._client.createItem<NewTaskDocument<T>>(
           task
         );
