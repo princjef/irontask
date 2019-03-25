@@ -62,6 +62,7 @@ describe('Listener', () => {
       expect(task.createTime).toEqual(createdTask.createTime);
       expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
       expect(task.lastRun).toEqual(createdTask.lastRun);
+      expect(task.currentRunStartTime).toEqual(expect.any(Date));
       expect(task.deliveries).toBe(createdTask.deliveries);
       expect(task.attempts).toBe(createdTask.attempts);
       expect(task.runs).toBe(createdTask.runs);
@@ -85,6 +86,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
     expect(afterTask!.payload).toEqual({ updated: 'data' });
   });
 
@@ -111,6 +113,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
     expect(afterTask!.payload).toEqual({ updated: 'data' });
   });
 
@@ -138,6 +141,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
     expect(afterTask!.payload).toEqual({ updated: 'data' });
   });
 
@@ -147,7 +151,16 @@ describe('Listener', () => {
     const task = await scoped.create({ initial: 'data' });
 
     let deliveryCount = 0;
+    let startTime: Date | undefined;
     const listener = scoped.listen<any>(task => {
+      if (deliveryCount === 0) {
+        startTime = task.currentRunStartTime;
+      } else {
+        // Start time should not change between attempts/deliveries of a single
+        // run
+        expect(task.currentRunStartTime).toEqual(startTime);
+      }
+
       deliveryCount += 1;
       task.payload = { updated: 'data' };
 
@@ -167,6 +180,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
     expect(deliveryCount).toEqual(2);
   });
 
@@ -191,6 +205,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be completed with an overridden next run time', async () => {
@@ -218,6 +233,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(2);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be explicitly retried', async () => {
@@ -242,6 +258,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be passed a custom delay on retry', async () => {
@@ -249,7 +266,10 @@ describe('Listener', () => {
 
     const task = await scoped.create({ initial: 'data' });
 
+    let startTime: Date | undefined;
+
     const listener = scoped.listen<any>(async task => {
+      startTime = task.currentRunStartTime;
       task.payload = { updated: 'data' };
       await task.retry(new Error('retrying'), 30000);
     });
@@ -270,6 +290,8 @@ describe('Listener', () => {
     expect(afterTask!.attempts).toBe(1);
     expect(afterTask!.deliveries).toBe(1);
     expect(afterTask!.lastRun).toBeUndefined();
+    expect(afterTask!.currentRunStartTime).toBeDefined();
+    expect(afterTask!.currentRunStartTime).toEqual(startTime);
   });
 
   it('can be explicitly failed for permanent errors', async () => {
@@ -292,6 +314,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(false);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be deferred to be redelivered without consuming retries', async () => {
@@ -319,6 +342,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be released to be redelivered immediately without consuming retries (used for disable)', async () => {
@@ -346,6 +370,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be deleted while processing', async () => {
@@ -368,7 +393,10 @@ describe('Listener', () => {
 
     const task = await scoped.create({ initial: 'data' });
 
+    let startTime: Date | undefined;
+
     const listener = scoped.listen<any>(task => {
+      startTime = task.currentRunStartTime;
       task.payload = { updated: 'data' };
       task.forceRelease();
     });
@@ -385,6 +413,7 @@ describe('Listener', () => {
     expect(afterTask!.payload).toEqual({ initial: 'data' });
     expect(afterTask!.runs).toBe(0);
     expect(afterTask!.lastRun).not.toBeDefined();
+    expect(afterTask!.currentRunStartTime).toEqual(startTime);
   });
 
   it('does not retry if the NO_RETRY constant is provided', async () => {
@@ -411,6 +440,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(false);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('does not allow multiple finishing calls to be made concurrently', async () => {
@@ -446,6 +476,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('does not allow multiple finishing calls to be made consecutively if already finished', async () => {
@@ -478,6 +509,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('does not allow finishing calls to be made if the lock was already lost', async () => {
@@ -492,8 +524,11 @@ describe('Listener', () => {
       }
     );
 
+    let startTime: Date | undefined;
+
     const listener = scoped.listen<any>(
       async task => {
+        startTime = task.currentRunStartTime;
         task.payload = { updated: 'data' };
 
         // We tell the listener to stop once we've received the task. This
@@ -530,6 +565,7 @@ describe('Listener', () => {
     expect(afterTask!.deliveries).toBe(1);
     expect(afterTask!.attempts).toBe(1);
     expect(afterTask!.lastRun).toBeUndefined();
+    expect(afterTask!.currentRunStartTime).toEqual(startTime);
   });
 
   it('is notified if the currently running task is disabled', async () => {
@@ -537,8 +573,12 @@ describe('Listener', () => {
 
     const createdTask = await scoped.create({ initial: 'data' });
 
+    let startTime: Date | undefined;
+
     const listener = scoped.listen<any>(
       async task => {
+        startTime = task.currentRunStartTime;
+
         task.payload = { updated: 'data' };
 
         // We disable the created task now so we know the signal won't
@@ -571,6 +611,7 @@ describe('Listener', () => {
     expect(afterTask!.deliveries).toBe(1);
     expect(afterTask!.attempts).toBe(0);
     expect(afterTask!.lastRun).toBeUndefined();
+    expect(afterTask!.currentRunStartTime).toEqual(startTime);
   });
 
   it('does nothing if forceRelease is called after task processing finishes', async () => {
@@ -597,6 +638,7 @@ describe('Listener', () => {
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
   });
 
   it('can be serialized with toJSON()', async () => {
@@ -613,6 +655,7 @@ describe('Listener', () => {
         createTime: task.createTime,
         nextRunTime: task.nextRunTime!.toISOString(),
         lastRun: undefined,
+        currentRunStartTime: undefined,
         deliveries: 0,
         attempts: 0,
         runs: 0,
@@ -870,6 +913,7 @@ describe('Listener', () => {
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.currentRunStartTime).toEqual(expect.any(Date));
         expect(task.deliveries).toBe(createdTask.deliveries);
         expect(task.attempts).toBe(createdTask.attempts);
         expect(task.runs).toBe(createdTask.runs);
@@ -893,6 +937,7 @@ describe('Listener', () => {
       expect(afterTask!.runs).toBe(1);
       expect(afterTask!.lastRun).toBeDefined();
       expect(afterTask!.lastRun!.succeeded).toBe(true);
+      expect(afterTask!.currentRunStartTime).toBeUndefined();
       expect(afterTask!.payload).toEqual({ updated: 'data' });
 
       expect(processingInterceptor).toHaveBeenCalledTimes(1);

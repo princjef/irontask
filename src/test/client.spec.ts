@@ -60,6 +60,7 @@ describe('Client', () => {
       expect(task.nextRunTime).toBeDefined();
       expect(task.nextRunTime!.getTime()).toBeLessThanOrEqual(Date.now());
       expect(task.lastRun).toBeUndefined();
+      expect(task.currentRunStartTime).toBeUndefined();
       expect(task.interval).toBeUndefined();
       expect(task.runs).toBe(0);
       expect(task.attempts).toBe(0);
@@ -1591,6 +1592,9 @@ describe('Client', () => {
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.currentRunStartTime).toEqual(
+          createdTask.currentRunStartTime
+        );
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
         expect(task.attempts).toBe(createdTask.attempts);
@@ -1765,6 +1769,9 @@ describe('Client', () => {
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.currentRunStartTime).toEqual(
+          createdTask.currentRunStartTime
+        );
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
         expect(task.attempts).toBe(createdTask.attempts);
@@ -1867,6 +1874,9 @@ describe('Client', () => {
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.currentRunStartTime).toEqual(
+          createdTask.currentRunStartTime
+        );
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
         expect(task.attempts).toBe(createdTask.attempts);
@@ -2440,6 +2450,7 @@ describe('Client', () => {
       expect(task.nextRunTime).toBeDefined();
       expect(task.nextRunTime!.getTime()).toBeLessThanOrEqual(Date.now());
       expect(task.lastRun).toBeUndefined();
+      expect(task.currentRunStartTime).toBeUndefined();
       expect(task.interval).toBeUndefined();
       expect(task.runs).toBe(0);
       expect(task.attempts).toBe(0);

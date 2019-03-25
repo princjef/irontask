@@ -70,6 +70,12 @@ export interface TaskDocument<T> {
     };
 
     /**
+     * Unix ms epoch representing the time that the current run began, if the
+     * job has begun running without finishing/failing.
+     */
+    currentRunStartTime?: number;
+
+    /**
      * Opaque string corresponding to the client that has the current lock on
      * the task
      */

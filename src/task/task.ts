@@ -51,6 +51,10 @@ export default class TaskImpl<T> implements Task<T> {
     return this._data.lastRun;
   }
 
+  get currentRunStartTime(): Date | undefined {
+    return this._data.currentRunStartTime;
+  }
+
   get deliveries(): number {
     return this._data.deliveries;
   }

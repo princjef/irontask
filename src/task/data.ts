@@ -63,6 +63,12 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
     };
   }
 
+  get currentRunStartTime(): Date | undefined {
+    return this.document.config.currentRunStartTime !== undefined
+      ? new Date(this.document.config.currentRunStartTime)
+      : undefined;
+  }
+
   get deliveries(): number {
     return this.document.config.deliveries;
   }
@@ -356,6 +362,8 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
             succeeded: this.lastRun.succeeded
           }
         : undefined,
+      currentRunStartTime:
+        this.currentRunStartTime && this.currentRunStartTime.toISOString(),
       deliveries: this.deliveries,
       attempts: this.attempts,
       runs: this.runs,
