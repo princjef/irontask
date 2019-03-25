@@ -52,23 +52,23 @@ jobs:
           summaryFileLocation: coverage\cobertura-coverage.xml
           reportDirectory: coverage
 
-  # - job: publish
-  #   dependsOn:
-  #     - commitlint
-  #     - test
-  #   pool: Hosted Ubuntu 1604
-  #   condition:
-  #     and(succeeded(), in(variables['Build.Reason'], 'Manual', 'IndividualCI',
-  #     'BatchedCI'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  #   steps:
-  #     - task: NodeTool@0
-  #       inputs:
-  #         versionSpec: 10.x
-  #       displayName: Use Node.js 10
-  #     - script: npm ci
-  #       displayName: Install Dependencies
-  #     - script: npm run release
-  #       env:
-  #         GH_TOKEN: $(GH_TOKEN)
-  #         NPM_TOKEN: $(NPM_TOKEN)
-  #       displayName: Publish to NPM
+  - job: publish
+    dependsOn:
+      - commitlint
+      - test
+    pool: Hosted Ubuntu 1604
+    condition:
+      and(succeeded(), in(variables['Build.Reason'], 'Manual', 'IndividualCI',
+      'BatchedCI'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: 10.x
+        displayName: Use Node.js 10
+      - script: npm ci
+        displayName: Install Dependencies
+      - script: npm run release
+        env:
+          GH_TOKEN: $(GH_TOKEN)
+          NPM_TOKEN: $(NPM_TOKEN)
+        displayName: Publish to NPM
