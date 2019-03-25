@@ -27,6 +27,7 @@ enum ErrorCode
 |  DATABASE\_TRANSIENT\_WRITE\_FAILURE | `"ERR_DATABASE_TRANSIENT_WRITE_FAILURE"` | The database encountered a transient error while writing data (449) |
 |  DATABASE\_UNAVAILABLE | `"ERR_DATABASE_UNAVAILABLE"` | The underlying database service is not currently available (503). |
 |  INTERCEPTOR\_NEXT\_FUNCTION\_ALREADY\_CALLED | `"ERR_INTERCEPTOR_NEXT_FUNCTION_ALREADY_CALLED"` | The next function on an interceptor was called more than one time. |
+|  INVALID\_CRON\_STRING\_INTERVAL | `"ERR_INVALID_CRON_STRING_INTERVAL"` | The provided cron string interval is invalid. |
 |  LISTENER\_DESTROYED | `"ERR_LISTENER_DESTROYED"` | The listener has been destroyed and cannot be used any more. |
 |  PROCESSING\_ALREADY\_FINISHED | `"ERR_PROCESSING_ALREADY_FINISHED"` | The operation cannot be performed because task processing has already finished. |
 |  PROCESSING\_FINISH\_IN\_PROGRESS | `"ERR_PROCESSING_FINISH_IN_PROGRESS"` | The operation cannot be performed because task processing is currently being finished. |

@@ -88,14 +88,6 @@ export interface TaskClientOptions {
  */
 export interface CreateTaskOptions {
   /**
-   * Specify a custom id for the task. If no id is specified, a UUID will be
-   * generated.
-   *
-   * @public
-   */
-  id?: string;
-
-  /**
    * Set to false if you don't want the task to be available for processing
    * when it's created.
    *

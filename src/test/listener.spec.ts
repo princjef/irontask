@@ -6,7 +6,6 @@
 import * as util from 'util';
 
 import moment = require('moment');
-import * as uuid from 'uuid/v4';
 
 import TaskClient, {
   ErrorCode,
@@ -15,6 +14,7 @@ import TaskClient, {
   Listener,
   NO_RETRY,
   ProcessingResult,
+  Task,
   TaskClientOptions,
   TaskStatus
 } from '..';
@@ -843,10 +843,10 @@ describe('Listener', () => {
   describe('interceptors', () => {
     it('captures information about the request', async () => {
       const type = 'listen-simpleInterceptor';
-      const taskId = uuid();
+      let createdTask: Task<any>;
 
       const processingInterceptor = jest.fn((async (ctx, next) => {
-        expect(ctx.task.id).toBe(taskId);
+        expect(ctx.task.id).toBe(createdTask.id);
         expect(ctx.task.type).toBe(type);
         const result = await next();
         expect(result).toBe(ProcessingResult.Complete);
@@ -860,10 +860,7 @@ describe('Listener', () => {
 
       const scoped = localClient.type(type);
 
-      const createdTask = await scoped.create(
-        { initial: 'data' },
-        { id: taskId }
-      );
+      createdTask = await scoped.create({ initial: 'data' });
 
       const listener = scoped.listen<any>(task => {
         expect(task.id).toBe(createdTask.id);
@@ -903,11 +900,11 @@ describe('Listener', () => {
 
     it('reports processing errors', async () => {
       const type = 'listen-retryInterceptor';
-      const taskId = uuid();
       const error = new Error('something went wrong');
+      let createdTask: Task<any>;
 
       const processingInterceptor = jest.fn((async (ctx, next) => {
-        expect(ctx.task.id).toBe(taskId);
+        expect(ctx.task.id).toBe(createdTask.id);
         expect(ctx.task.type).toBe(type);
         const result = await next();
         expect(result).toBe(ProcessingResult.Retry);
@@ -923,7 +920,7 @@ describe('Listener', () => {
 
       const scoped = localClient.type(type);
 
-      await scoped.create({ initial: 'data' }, { id: taskId });
+      createdTask = await scoped.create({ initial: 'data' });
 
       const listener = scoped.listen<any>(async task => {
         await task.retry(new Error('something went wrong'), 500);
@@ -936,10 +933,10 @@ describe('Listener', () => {
 
     it('throws if it tries to call next multiple times', async () => {
       const type = 'listen-interceptorDuplicate';
-      const taskId = uuid();
+      let createdTask: Task<any>;
 
       const processingInterceptor = jest.fn((async (ctx, next) => {
-        expect(ctx.task.id).toBe(taskId);
+        expect(ctx.task.id).toBe(createdTask.id);
         expect(ctx.task.type).toBe(type);
         await next();
         try {
@@ -964,7 +961,7 @@ describe('Listener', () => {
 
       const scoped = localClient.type(type);
 
-      await scoped.create({ initial: 'data' }, { id: taskId });
+      createdTask = await scoped.create({ initial: 'data' });
 
       const listener = scoped.listen<any>(async task => {});
 

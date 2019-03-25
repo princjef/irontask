@@ -32,6 +32,8 @@ const ERROR_MESSAGE: { [K in ErrorCode]: string } = {
     'The database service is currently unavailable.',
   [ErrorCode.INTERCEPTOR_NEXT_FUNCTION_ALREADY_CALLED]:
     'The next function for this interceptor has already been called. Next functions may only be called once.',
+  [ErrorCode.INVALID_CRON_STRING_INTERVAL]:
+    'The provided cron string interval is invalid.',
   [ErrorCode.LISTENER_DESTROYED]:
     'Cannot destroy a listener that is already destroyed.',
   [ErrorCode.PROCESSING_ALREADY_FINISHED]:

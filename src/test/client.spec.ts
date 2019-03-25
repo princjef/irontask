@@ -4,7 +4,6 @@
  */
 
 import moment = require('moment');
-import * as uuid from 'uuid/v4';
 
 import TaskClient, {
   ErrorCode,
@@ -84,18 +83,6 @@ describe('Client', () => {
       expect(task.status).toBe(TaskStatus.Scheduled);
       expect(task.nextRunTime).toBeDefined();
       expect(task.nextRunTime!.getTime()).toEqual(startTime.getTime());
-    });
-
-    it('allows the task id to be customized', async () => {
-      const task = await client.create(
-        type,
-        { hello: 'world' },
-        {
-          id: 'custom-id'
-        }
-      );
-
-      expect(task.id).toEqual('custom-id');
     });
 
     it('supports repeating tasks with a numeric interval, setting the first run to the current time', async () => {
@@ -195,11 +182,10 @@ describe('Client', () => {
 
   describe('#get', () => {
     const type = 'get-task';
-    const id = uuid();
     let createdTask: Task<any>;
 
     beforeAll(async () => {
-      createdTask = await client.create(type, { hello: 'world' }, { id });
+      createdTask = await client.create(type, { hello: 'world' });
     });
 
     afterAll(async () => {
@@ -207,7 +193,7 @@ describe('Client', () => {
     });
 
     it('returns the requested task with all of the same data returned upon creation', async () => {
-      const task = await client.get<any>(type, id);
+      const task = await client.get<any>(type, createdTask.id);
 
       expect(task).toBeDefined();
       expect(task!.id).toBe(createdTask.id);
@@ -231,7 +217,7 @@ describe('Client', () => {
     });
 
     it('works with a scoped client', async () => {
-      const task = await client.type(type).get<any>(id);
+      const task = await client.type(type).get<any>(createdTask.id);
 
       expect(task).toBeDefined();
       expect(task!.id).toBe(createdTask.id);
@@ -2464,18 +2450,14 @@ describe('Client', () => {
     });
 
     it('captures request errors', async () => {
-      const task = await client.create(type, { hello: 'world' });
-
       const clientInterceptor = jest.fn((async (ctx, next) => {
         expect(ctx.operation).toBe(Interceptors.TaskClientOperation.Create);
-        expect(ctx.ruConsumption).toBeUndefined();
         try {
           await next();
           fail('should have thrown');
         } catch (err) {
-          expect(ctx.ruConsumption).toBeGreaterThan(0);
           expect(
-            IronTaskError.is(err, ErrorCode.DATABASE_RESOURCE_ALREADY_EXISTS)
+            IronTaskError.is(err, ErrorCode.INVALID_CRON_STRING_INTERVAL)
           ).toBe(true);
           throw err;
         }
@@ -2488,11 +2470,17 @@ describe('Client', () => {
       });
 
       try {
-        await localClient.create(type, {}, { id: task.id });
+        await localClient.create(
+          type,
+          {},
+          {
+            interval: '0 0 31 2 0'
+          }
+        );
         fail('should have thrown');
       } catch (err) {
         expect(
-          IronTaskError.is(err, ErrorCode.DATABASE_RESOURCE_ALREADY_EXISTS)
+          IronTaskError.is(err, ErrorCode.INVALID_CRON_STRING_INTERVAL)
         ).toBe(true);
       }
 
