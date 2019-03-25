@@ -23,6 +23,7 @@ interface TaskBase<T>
 |  --- | --- | --- |
 |  [attempts](./taskbase.md#attempts-property) | `number` | Number of times task processing has been attempted unsuccessfully. This number only includes attempts that are not currently running and resets after each time the task completes or fails a run. It is similar to deliveries but only increments for results that indicate some sort of failure. These include calling [ActiveTask.retry()](./activetask.md#retry-method) and when the task's lock expires. |
 |  [createTime](./taskbase.md#createTime-property) | `Date` | Date representing the time when the task was first created |
+|  [currentRunStartTime](./taskbase.md#currentRunStartTime-property) | `Date` | Date representing the time when the current run of the job began, if there is a current run. |
 |  [deliveries](./taskbase.md#deliveries-property) | `number` | Number of times the task has been delivered for processing. This number only includes deliveries that are not currently running and resets after each time the task completes or fails a run. |
 |  [enabled](./taskbase.md#enabled-property) | `boolean` | Indicates whether the task is eligible for processing |
 |  [id](./taskbase.md#id-property) | `string` | Unique identifier for the task |
@@ -64,6 +65,20 @@ Date representing the time when the task was first created
 
 ```typescript
 readonly createTime: Date;
+```
+
+<a id="currentRunStartTime-property"></a>
+
+### currentRunStartTime
+
+Date representing the time when the current run of the job began, if there is a current run.
+
+It will be present for any job which has begun running but has not yet finished for any reason, including because it was disabled while running. It will only be defined if there is an uncompleted run of the task.
+
+<b>Signature:</b>
+
+```typescript
+readonly currentRunStartTime?: Date;
 ```
 
 <a id="deliveries-property"></a>

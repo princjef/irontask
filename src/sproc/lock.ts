@@ -98,6 +98,8 @@ export function lock(
   ) {
     const task = tasks[index];
 
+    const now = Date.now();
+
     // If the lock expired without us being able to release the task from
     // processing explicitly, we need to increment the attempt/delivery
     // counters for that delivery as if it had been finished.
@@ -106,8 +108,13 @@ export function lock(
       task.config.deliveries += 1;
     }
 
-    task.config.lockedUntilTime = Date.now() + lockDurationMs;
+    task.config.lockedUntilTime = now + lockDurationMs;
     task.config.lockToken = lockToken;
+
+    // If the task does not already have a current start time set, set one now
+    if (!task.config.currentRunStartTime) {
+      task.config.currentRunStartTime = now;
+    }
 
     const accepted = container.replaceDocument(
       task._self,

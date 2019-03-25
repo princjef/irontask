@@ -345,6 +345,7 @@ describe('Task', () => {
       expect(serialized.createTime).toBe(task.createTime.toISOString());
       expect(serialized.nextRunTime).toBe(task.nextRunTime!.toISOString());
       expect(serialized.lastRun).toBeUndefined();
+      expect(serialized.currentRunStartTime).toBeUndefined();
       expect(serialized.deliveries).toBe(task.deliveries);
       expect(serialized.attempts).toBe(task.attempts);
       expect(serialized.runs).toBe(task.runs);

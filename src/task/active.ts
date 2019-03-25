@@ -75,6 +75,10 @@ export default class ActiveTaskImpl<T> extends EventEmitter
     return this._data.lastRun;
   }
 
+  get currentRunStartTime(): Date | undefined {
+    return this._data.currentRunStartTime;
+  }
+
   get deliveries(): number {
     return this._data.deliveries;
   }
@@ -466,10 +470,13 @@ export default class ActiveTaskImpl<T> extends EventEmitter
       attempts: 0,
       deliveries: 0,
       lastRun: {
-        startTime: this._processingStart,
+        startTime: this.currentRunStartTime
+          ? this.currentRunStartTime.getTime()
+          : this._processingStart,
         finishTime: this._data.timestamp(),
         succeeded
-      }
+      },
+      currentRunStartTime: undefined
     }),
     scheduleNextRun: (nextRunTime: number | undefined): TaskPatch => ({
       nextRunTime

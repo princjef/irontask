@@ -66,6 +66,10 @@ export default class ReadonlyTaskImpl<T> implements ReadonlyTask<T> {
     return this._data.lastRun;
   }
 
+  get currentRunStartTime(): Date | undefined {
+    return this._data.currentRunStartTime;
+  }
+
   get deliveries(): number {
     return this._data.deliveries;
   }

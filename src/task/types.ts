@@ -88,6 +88,20 @@ export interface TaskBase<T> {
   };
 
   /**
+   * Date representing the time when the current run of the job began, if there
+   * is a current run.
+   *
+   * @remarks
+   *
+   * It will be present for any job which has begun running but has not yet
+   * finished for any reason, including because it was disabled while running.
+   * It will only be defined if there is an uncompleted run of the task.
+   *
+   * @public
+   */
+  readonly currentRunStartTime?: Date;
+
+  /**
    * Number of times the task has been delivered for processing. This number
    * only includes deliveries that are not currently running and resets after
    * each time the task completes or fails a run.
@@ -226,6 +240,20 @@ export interface SerializedTask<T> {
      */
     succeeded: boolean;
   };
+
+  /**
+   * ISO date string representing the time when the current run of the job
+   * began, if there is a current run.
+   *
+   * @remarks
+   *
+   * It will be present for any job which has begun running but has not yet
+   * finished for any reason, including because it was disabled while running.
+   * It will only be defined if there is an uncompleted run of the task.
+   *
+   * @public
+   */
+  currentRunStartTime?: string;
 
   /**
    * Number of times the task has been delivered for processing. This number
