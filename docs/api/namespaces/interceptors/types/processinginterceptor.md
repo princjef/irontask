@@ -2,6 +2,8 @@
 
 # Type Interceptors.ProcessingInterceptor
 
+Interceptor function for handling processing requests.
+
 <b>Signature:</b>
 
 ```typescript

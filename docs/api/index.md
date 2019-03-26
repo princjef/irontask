@@ -25,7 +25,7 @@
 |  --- | --- |
 |  [ActiveTask](./interfaces/activetask.md) | Representation of a task that is currently being processed by a [Listener](./interfaces/listener.md)<!-- -->. It provides the ability to see information and update values of the task like when working with a [Task](./interfaces/task.md)<!-- -->, but also has additional functionality specific to processing, such as completing, retrying, etc. |
 |  [CreateTaskOptions](./interfaces/createtaskoptions.md) | Options for configuring a task created through the [TaskClient](./classes/taskclient.md)<!-- -->. |
-|  [Interceptors](./interfaces/interceptors.md) |  |
+|  [Interceptors](./interfaces/interceptors.md) | Set of functions provided for intercepting various types of operations. Each Interceptor that is provided will be invoked for each operation of the relevant type. |
 |  [IterateOptions](./interfaces/iterateoptions.md) | Options controlling iterator-based operations. |
 |  [IterateSummaryOptions](./interfaces/iteratesummaryoptions.md) | Options controlling iterator-based operations on task summaries. |
 |  [Listener](./interfaces/listener.md) | Listener for processing tasks of a single type. It is generally created by calling [TaskClient.listen()](./classes/taskclient.md#listen-method)<!-- -->. |
@@ -47,7 +47,7 @@
 |  Namespace | Description |
 |  --- | --- |
 |  [FnSymbol](./namespaces/fnsymbol.md) |  |
-|  [Interceptors](./namespaces/interceptors.md) |  |
+|  [Interceptors](./namespaces/interceptors.md) | Interfaces and helper types for the interceptor capability set. |
 |  [OpSymbol](./namespaces/opsymbol.md) |  |
 |  [PropSymbol](./namespaces/propsymbol.md) |  |
 |  [q](./namespaces/q.md) | Query expressions for creating Cosmos DB filters in operations such as [TaskClient.list()](./classes/taskclient.md#list-method)<!-- -->, [TaskClient.listSummary()](./classes/taskclient.md#listSummary-method)<!-- -->, [TaskClient.iterate()](./classes/taskclient.md#iterate-method) and [TaskClient.iterateSummary()](./classes/taskclient.md#iterateSummary-method)<!-- -->. |

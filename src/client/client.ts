@@ -311,7 +311,7 @@ export default class TaskClient {
 
     return this._interceptor.client(
       this,
-      Interceptors.TaskClientOperation.List,
+      Interceptors.TaskClientOperation.ListAll,
       this._client.containerRef,
       undefined,
       async () => {
@@ -421,7 +421,7 @@ export default class TaskClient {
 
     return this._interceptor.client(
       this,
-      Interceptors.TaskClientOperation.ListSummary,
+      Interceptors.TaskClientOperation.ListAllSummary,
       this._client.containerRef,
       undefined,
       async () => {
@@ -518,7 +518,7 @@ export default class TaskClient {
     );
 
     const mappedIterator = this._iterate(
-      Interceptors.TaskClientOperation.Iterate,
+      Interceptors.TaskClientOperation.IterateAll,
       undefined,
       iterator,
       doc => TaskImpl.create(this._client, this._interceptor, doc)
@@ -568,7 +568,7 @@ export default class TaskClient {
     );
 
     const mappedIterator = this._iterate(
-      Interceptors.TaskClientOperation.Iterate,
+      Interceptors.TaskClientOperation.IterateSummary,
       type,
       iterator,
       doc => ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
@@ -622,7 +622,7 @@ export default class TaskClient {
     );
 
     const mappedIterator = this._iterate(
-      Interceptors.TaskClientOperation.Iterate,
+      Interceptors.TaskClientOperation.IterateAllSummary,
       undefined,
       iterator,
       doc => ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
@@ -670,7 +670,7 @@ export default class TaskClient {
    */
   async disableAll(filter?: QueryType.Bool): Promise<void> {
     await this._bulkUpdate(
-      Interceptors.TaskClientOperation.Disable,
+      Interceptors.TaskClientOperation.DisableAll,
       Interceptors.TaskOperation.Disable,
       undefined,
       buildQuery({ filter }),
@@ -715,7 +715,7 @@ export default class TaskClient {
    */
   async enableAll(filter?: QueryType.Bool): Promise<void> {
     await this._bulkUpdate(
-      Interceptors.TaskClientOperation.Enable,
+      Interceptors.TaskClientOperation.EnableAll,
       Interceptors.TaskOperation.Enable,
       undefined,
       buildQuery({ filter }),
@@ -773,7 +773,7 @@ export default class TaskClient {
    */
   async deleteAll(filter?: QueryType.Bool): Promise<void> {
     await this._bulkUpdate(
-      Interceptors.TaskClientOperation.Delete,
+      Interceptors.TaskClientOperation.DeleteAll,
       Interceptors.TaskOperation.Delete,
       undefined,
       buildQuery({ filter }),

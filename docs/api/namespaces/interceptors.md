@@ -2,6 +2,7 @@
 
 # Namespace Interceptors
 
+Interfaces and helper types for the interceptor capability set.
 
 <b>Signature:</b>
 
@@ -13,24 +14,24 @@ namespace Interceptors
 
 |  Enumeration | Description |
 |  --- | --- |
-|  [TaskClientOperation](./interceptors/enums/taskclientoperation.md) |  |
-|  [TaskOperation](./interceptors/enums/taskoperation.md) |  |
+|  [TaskClientOperation](./interceptors/enums/taskclientoperation.md) | Enumeration of operations that can be triggered via the client interceptor. |
+|  [TaskOperation](./interceptors/enums/taskoperation.md) | Enumeration of operations that can be triggered via the task interceptor. |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [ProcessingContext](./interceptors/interfaces/processingcontext.md) |  |
-|  [TaskClientRequestContext](./interceptors/interfaces/taskclientrequestcontext.md) |  |
-|  [TaskRequestContext](./interceptors/interfaces/taskrequestcontext.md) |  |
+|  [ProcessingContext](./interceptors/interfaces/processingcontext.md) | Context provided to the processing interceptor for each request. |
+|  [TaskClientRequestContext](./interceptors/interfaces/taskclientrequestcontext.md) | Context provided to the client interceptor for each request. |
+|  [TaskRequestContext](./interceptors/interfaces/taskrequestcontext.md) | Context provided to the task interceptor for each request. |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [ClientRequestInterceptor](./interceptors/types/clientrequestinterceptor.md) |  |
-|  [ProcessingInterceptor](./interceptors/types/processinginterceptor.md) |  |
-|  [ProcessingNext](./interceptors/types/processingnext.md) |  |
-|  [RequestNext](./interceptors/types/requestnext.md) |  |
-|  [TaskRequestInterceptor](./interceptors/types/taskrequestinterceptor.md) |  |
+|  [ClientRequestInterceptor](./interceptors/types/clientrequestinterceptor.md) | Interceptor function for handling client-level requests. |
+|  [ProcessingInterceptor](./interceptors/types/processinginterceptor.md) | Interceptor function for handling processing requests. |
+|  [ProcessingNext](./interceptors/types/processingnext.md) | Next function provided for any processing interceptors. |
+|  [RequestNext](./interceptors/types/requestnext.md) | Next function provided for any request interceptors. |
+|  [TaskRequestInterceptor](./interceptors/types/taskrequestinterceptor.md) | Interceptor function for handling task-level requests. |
 

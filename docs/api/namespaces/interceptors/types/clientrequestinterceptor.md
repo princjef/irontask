@@ -2,6 +2,8 @@
 
 # Type Interceptors.ClientRequestInterceptor
 
+Interceptor function for handling client-level requests.
+
 <b>Signature:</b>
 
 ```typescript

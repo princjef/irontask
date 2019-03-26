@@ -2,6 +2,8 @@
 
 # Type Interceptors.RequestNext
 
+Next function provided for any request interceptors.
+
 <b>Signature:</b>
 
 ```typescript

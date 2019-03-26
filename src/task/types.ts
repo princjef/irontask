@@ -88,12 +88,12 @@ export interface TaskBase<T> {
   };
 
   /**
-   * Date representing the time when the current run of the job began, if there
+   * Date representing the time when the current run of the task began, if there
    * is a current run.
    *
    * @remarks
    *
-   * It will be present for any job which has begun running but has not yet
+   * It will be present for any task which has begun running but has not yet
    * finished for any reason, including because it was disabled while running.
    * It will only be defined if there is an uncompleted run of the task.
    *
@@ -242,12 +242,12 @@ export interface SerializedTask<T> {
   };
 
   /**
-   * ISO date string representing the time when the current run of the job
+   * ISO date string representing the time when the current run of the task
    * began, if there is a current run.
    *
    * @remarks
    *
-   * It will be present for any job which has begun running but has not yet
+   * It will be present for any task which has begun running but has not yet
    * finished for any reason, including because it was disabled while running.
    * It will only be defined if there is an uncompleted run of the task.
    *
