@@ -2,6 +2,8 @@
 
 # Enum Interceptors.TaskOperation
 
+Enumeration of operations that can be triggered via the task interceptor.
+
 <b>Signature:</b>
 
 ```typescript

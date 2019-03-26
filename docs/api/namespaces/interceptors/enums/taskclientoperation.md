@@ -2,6 +2,8 @@
 
 # Enum Interceptors.TaskClientOperation
 
+Enumeration of operations that can be triggered via the client interceptor.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,13 +16,20 @@ enum TaskClientOperation
 |  --- | --- | --- |
 |  Create | `"create"` |  |
 |  Delete | `"delete"` |  |
+|  DeleteAll | `"deleteAll"` |  |
 |  DeleteOne | `"deleteOne"` |  |
 |  Disable | `"disable"` |  |
+|  DisableAll | `"disableAll"` |  |
 |  Enable | `"enable"` |  |
+|  EnableAll | `"enableAll"` |  |
 |  Get | `"get"` |  |
 |  Iterate | `"iterate"` |  |
+|  IterateAll | `"iterateAll"` |  |
+|  IterateAllSummary | `"iterateAllSummary"` |  |
 |  IterateSummary | `"iterateSummary"` |  |
 |  List | `"list"` |  |
+|  ListAll | `"listAll"` |  |
+|  ListAllSummary | `"listAllSummary"` |  |
 |  ListSummary | `"listSummary"` |  |
 |  LockTasks | `"lockTasks"` |  |
 |  RegisterSprocs | `"registerSprocs"` |  |

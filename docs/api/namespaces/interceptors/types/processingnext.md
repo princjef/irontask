@@ -2,6 +2,8 @@
 
 # Type Interceptors.ProcessingNext
 
+Next function provided for any processing interceptors.
+
 <b>Signature:</b>
 
 ```typescript

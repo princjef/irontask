@@ -2,6 +2,8 @@
 
 # Interface Interceptors.TaskClientRequestContext
 
+Context provided to the client interceptor for each request.
+
 <b>Signature:</b>
 
 ```typescript
@@ -12,17 +14,19 @@ interface TaskClientRequestContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [client](./taskclientrequestcontext.md#client-property) | [TaskClient](../../../classes/taskclient.md) |  |
-|  [operation](./taskclientrequestcontext.md#operation-property) | [TaskClientOperation](../enums/taskclientoperation.md) |  |
-|  [ref](./taskclientrequestcontext.md#ref-property) | `string` |  |
-|  [ruConsumption](./taskclientrequestcontext.md#ruConsumption-property) | `number` |  |
-|  [type](./taskclientrequestcontext.md#type-property) | `string` |  |
+|  [client](./taskclientrequestcontext.md#client-property) | [TaskClient](../../../classes/taskclient.md) | Client against which the request is being made |
+|  [operation](./taskclientrequestcontext.md#operation-property) | [TaskClientOperation](../enums/taskclientoperation.md) | The operation that is being performed |
+|  [ref](./taskclientrequestcontext.md#ref-property) | `string` | Reference to the database entity that the operation is running against. This will typically either be the url of a single Cosmos DB document or the url of the container/collection. |
+|  [ruConsumption](./taskclientrequestcontext.md#ruConsumption-property) | `number` | The Cosmos DB Request Units consumed by the operation (if any) |
+|  [type](./taskclientrequestcontext.md#type-property) | `string` | The type of job(s) that the request is scoped to (if any) |
 
 ## Property Details
 
 <a id="client-property"></a>
 
 ### client
+
+Client against which the request is being made
 
 <b>Signature:</b>
 
@@ -34,6 +38,8 @@ client: TaskClient;
 
 ### operation
 
+The operation that is being performed
+
 <b>Signature:</b>
 
 ```typescript
@@ -43,6 +49,8 @@ operation: TaskClientOperation;
 <a id="ref-property"></a>
 
 ### ref
+
+Reference to the database entity that the operation is running against. This will typically either be the url of a single Cosmos DB document or the url of the container/collection.
 
 <b>Signature:</b>
 
@@ -54,6 +62,8 @@ ref: string;
 
 ### ruConsumption
 
+The Cosmos DB Request Units consumed by the operation (if any)
+
 <b>Signature:</b>
 
 ```typescript
@@ -63,6 +73,8 @@ ruConsumption?: number;
 <a id="type-property"></a>
 
 ### type
+
+The type of job(s) that the request is scoped to (if any)
 
 <b>Signature:</b>
 

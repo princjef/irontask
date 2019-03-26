@@ -2,6 +2,8 @@
 
 # Type Interceptors.TaskRequestInterceptor
 
+Interceptor function for handling task-level requests.
+
 <b>Signature:</b>
 
 ```typescript
