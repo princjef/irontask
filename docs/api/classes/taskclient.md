@@ -20,6 +20,8 @@ class TaskClient
 
 |  Method | Description |
 |  --- | --- |
+|  [count(type, filter)](./taskclient.md#count-method) | Compute the number of tasks of the given type that currently exist, optionally filtered to a custom group of tasks within the type. |
+|  [countAll(filter)](./taskclient.md#countAll-method) | Compute the number of tasks across all types that currently exist, optionally filtered to a custom group of tasks. |
 |  [create(type, payload, options)](./taskclient.md#create-method) | Creates a task and saves it to the database. |
 |  [delete(type, filter)](./taskclient.md#delete-method) | Deletes tasks of the provided type, optionally filtered to a custom group of tasks within the type. |
 |  [deleteAll(filter)](./taskclient.md#deleteAll-method) | Deletes tasks across all types, optionally filtered to a custom group of tasks. |
@@ -72,6 +74,51 @@ static create(account: string, database: string, collection: string, key: string
 Promise containing the initialized client
 
 ## Method Details
+
+<a id="count-method"></a>
+
+### count(type, filter)
+
+Compute the number of tasks of the given type that currently exist, optionally filtered to a custom group of tasks within the type.
+
+<b>Signature:</b>
+
+```typescript
+count(type: string, filter?: QueryType.Bool): Promise<number>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  type | `string` |  |
+|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to include |
+
+<b>Returns:</b>
+
+`Promise<number>`
+
+<a id="countAll-method"></a>
+
+### countAll(filter)
+
+Compute the number of tasks across all types that currently exist, optionally filtered to a custom group of tasks.
+
+<b>Signature:</b>
+
+```typescript
+countAll(filter?: QueryType.Bool): Promise<number>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks to include |
+
+<b>Returns:</b>
+
+`Promise<number>`
 
 <a id="create-method"></a>
 
@@ -136,7 +183,7 @@ deleteAll(filter?: QueryType.Bool): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to delete |
+|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks to delete |
 
 <b>Returns:</b>
 
@@ -206,7 +253,7 @@ disableAll(filter?: QueryType.Bool): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to disable |
+|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks to disable |
 
 <b>Returns:</b>
 
@@ -253,7 +300,7 @@ enableAll(filter?: QueryType.Bool): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to enable |
+|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks to enable |
 
 <b>Returns:</b>
 

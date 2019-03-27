@@ -21,7 +21,7 @@ interface SerializedTask<T>
 |  --- | --- | --- |
 |  [attempts](./serializedtask.md#attempts-property) | `number` | Number of times task processing has been attempted unsuccessfully. This number only includes attempts that are not currently running and resets after each time the task completes or fails a run. It is similar to deliveries but only increments for results that indicate some sort of failure. These include calling `retry()` on the task and when the task's lock expires. |
 |  [createTime](./serializedtask.md#createTime-property) | `string` | ISO date string representing the time when the task was first created |
-|  [currentRunStartTime](./serializedtask.md#currentRunStartTime-property) | `string` | ISO date string representing the time when the current run of the job began, if there is a current run. |
+|  [currentRunStartTime](./serializedtask.md#currentRunStartTime-property) | `string` | ISO date string representing the time when the current run of the task began, if there is a current run. |
 |  [deliveries](./serializedtask.md#deliveries-property) | `number` | Number of times the task has been delivered for processing. This number only includes deliveries that are not currently running and resets after each time the task completes or fails a run. |
 |  [enabled](./serializedtask.md#enabled-property) | `boolean` | Indicates whether the task is eligible for processing |
 |  [id](./serializedtask.md#id-property) | `string` | Unique identifier for the task |
@@ -63,9 +63,9 @@ createTime: string;
 
 ### currentRunStartTime
 
-ISO date string representing the time when the current run of the job began, if there is a current run.
+ISO date string representing the time when the current run of the task began, if there is a current run.
 
-It will be present for any job which has begun running but has not yet finished for any reason, including because it was disabled while running. It will only be defined if there is an uncompleted run of the task.
+It will be present for any task which has begun running but has not yet finished for any reason, including because it was disabled while running. It will only be defined if there is an uncompleted run of the task.
 
 <b>Signature:</b>
 

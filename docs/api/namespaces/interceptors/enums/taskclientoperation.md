@@ -14,6 +14,8 @@ enum TaskClientOperation
 
 |  Member | Value | Description |
 |  --- | --- | --- |
+|  Count | `"count"` |  |
+|  CountAll | `"countAll"` |  |
 |  Create | `"create"` |  |
 |  Delete | `"delete"` |  |
 |  DeleteAll | `"deleteAll"` |  |

@@ -2036,6 +2036,170 @@ describe('Client', () => {
     });
   });
 
+  describe('#count', () => {
+    const type = 'count-task';
+    const createdTasks: Task<any>[] = [];
+
+    beforeAll(async () => {
+      const startTime = Date.now();
+
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 3, group: 'a' },
+          {
+            scheduledTime: moment(startTime)
+              .add(15, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 2, group: 'b' },
+          {
+            scheduledTime: moment(startTime)
+              .subtract(1, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 1, group: 'a' },
+          {
+            scheduledTime: moment(startTime)
+              .add(20, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 0, group: 'b' },
+          {
+            scheduledTime: moment(startTime)
+              .add(12, 'minutes')
+              .toDate()
+          }
+        )
+      );
+    });
+
+    afterAll(async () => {
+      await client.delete(type);
+    });
+
+    it('returns the number of tasks of the type by default', async () => {
+      const count = await client.count(type);
+
+      expect(count).toBe(createdTasks.length);
+    });
+
+    it('returns 0 if there are no tasks of the given type', async () => {
+      const count = await client.count('nonexistent-type');
+
+      expect(count).toBe(0);
+    });
+
+    it('returns the filtered count if one is provided', async () => {
+      const count = await client.count(type, q.equal(t.payload('group'), 'a'));
+
+      expect(count).toBe(2);
+    });
+
+    it('allows filtering by state', async () => {
+      const count = await client.count(type, t.hasStatus(TaskStatus.Scheduled));
+
+      expect(count).toBe(3);
+    });
+
+    it('works with a scoped client', async () => {
+      const count = await client.type(type).count();
+
+      expect(count).toBe(createdTasks.length);
+    });
+  });
+
+  describe('#countAll', () => {
+    const types = ['count-all-task-1', 'count-all-task-2'];
+    const createdTasks: Task<any>[] = [];
+
+    beforeAll(async () => {
+      const startTime = Date.now();
+
+      createdTasks.push(
+        await client.create(
+          types[0],
+          { reverseIndex: 3, group: 'a' },
+          {
+            scheduledTime: moment(startTime)
+              .add(15, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          types[1],
+          { reverseIndex: 2, group: 'b' },
+          {
+            scheduledTime: moment(startTime)
+              .subtract(1, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          types[0],
+          { reverseIndex: 1, group: 'a' },
+          {
+            scheduledTime: moment(startTime)
+              .add(20, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          types[1],
+          { reverseIndex: 0, group: 'b' },
+          {
+            scheduledTime: moment(startTime)
+              .add(12, 'minutes')
+              .toDate()
+          }
+        )
+      );
+    });
+
+    afterAll(async () => {
+      await client.deleteAll();
+    });
+
+    it('returns the total number of tasks by default', async () => {
+      const count = await client.countAll();
+
+      expect(count).toBe(createdTasks.length);
+    });
+
+    it('returns the filtered count if applicable', async () => {
+      const count = await client.countAll(q.equal(t.payload('group'), 'a'));
+
+      expect(count).toBe(2);
+    });
+
+    it('allows filtering by state', async () => {
+      const count = await client.countAll(t.hasStatus(TaskStatus.Scheduled));
+
+      expect(count).toBe(3);
+    });
+  });
+
   describe('#disable', () => {
     const type = 'disable-task';
 

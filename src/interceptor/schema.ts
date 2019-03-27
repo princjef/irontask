@@ -162,6 +162,8 @@ namespace Interceptors {
     IterateSummary = 'iterateSummary',
     IterateAll = 'iterateAll',
     IterateAllSummary = 'iterateAllSummary',
+    Count = 'count',
+    CountAll = 'countAll',
     Disable = 'disable',
     DisableAll = 'disableAll',
     Enable = 'enable',

@@ -145,6 +145,17 @@ export default class ScopedTaskClient {
   }
 
   /**
+   * Compute the number of tasks of the given type that currently exist,
+   * optionally filtered to a custom group of tasks within the type.
+   *
+   * @param filter  - Query filter specifying which tasks within the provided
+   *                  type to include
+   */
+  async count(filter?: QueryType.Bool): Promise<number> {
+    return this._client.count(this._type, filter);
+  }
+
+  /**
    * Disables tasks of the scoped type, optionally filtered to a custom
    * group of tasks within the type.
    *
