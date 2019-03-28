@@ -634,6 +634,71 @@ export default class TaskClient {
   }
 
   /**
+   * Compute the number of tasks of the given type that currently exist,
+   * optionally filtered to a custom group of tasks within the type.
+   *
+   * @param type    - Task type
+   * @param filter  - Query filter specifying which tasks within the provided
+   *                  type to include
+   */
+  async count(type: string, filter?: QueryType.Bool): Promise<number> {
+    const query = buildQuery({
+      filter: typeFilter(type, filter),
+      rawProjection: 'VALUE COUNT(1)'
+    });
+
+    return this._interceptor.client(
+      this,
+      Interceptors.TaskClientOperation.Count,
+      this._client.containerRef,
+      type,
+      async () => {
+        const response = await this._client.queryItemsArray<number>(query);
+        return {
+          ...response,
+          result: response.result[0]
+        };
+      }
+    );
+  }
+
+  /**
+   * Compute the number of tasks across all types that currently exist,
+   * optionally filtered to a custom group of tasks.
+   *
+   * @remarks
+   *
+   * Performing operations across multiple types results in cross partition
+   * queries to Cosmos DB. This can cause a significant performance impact,
+   * especially when paging and/or sorting results. Use this API with care.
+   *
+   * @param filter  - Query filter specifying which tasks to include
+   */
+  async countAll(filter?: QueryType.Bool): Promise<number> {
+    const query = buildQuery({
+      filter,
+      rawProjection: 'VALUE COUNT(1)'
+    });
+
+    return this._interceptor.client(
+      this,
+      Interceptors.TaskClientOperation.Count,
+      this._client.containerRef,
+      undefined,
+      async () => {
+        const response = await this._client.queryItemsArray<number>(
+          query,
+          true
+        );
+        return {
+          ...response,
+          result: response.result[0]
+        };
+      }
+    );
+  }
+
+  /**
    * Disables tasks of the provided type, optionally filtered to a custom group
    * of tasks within the type.
    *
@@ -663,8 +728,7 @@ export default class TaskClient {
    * queries to Cosmos DB. This can cause a significant performance impact,
    * especially when paging and/or sorting results. Use this API with care.
    *
-   * @param filter  - Query filter specifying which tasks within the provided
-   *                  type to disable
+   * @param filter  - Query filter specifying which tasks to disable
    *
    * @public
    */
@@ -708,8 +772,7 @@ export default class TaskClient {
    * queries to Cosmos DB. This can cause a significant performance impact,
    * especially when paging and/or sorting results. Use this API with care.
    *
-   * @param filter  - Query filter specifying which tasks within the provided
-   *                  type to enable
+   * @param filter  - Query filter specifying which tasks to enable
    *
    * @public
    */
@@ -766,8 +829,7 @@ export default class TaskClient {
    * Deletes tasks across all types, optionally filtered to a custom group
    * of tasks.
    *
-   * @param filter  - Query filter specifying which tasks within the provided
-   *                  type to delete
+   * @param filter  - Query filter specifying which tasks to delete
    *
    * @public
    */

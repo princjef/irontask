@@ -14,6 +14,7 @@ class ScopedTaskClient
 
 |  Method | Description |
 |  --- | --- |
+|  [count(filter)](./scopedclient.md#count-method) | Compute the number of tasks of the given type that currently exist, optionally filtered to a custom group of tasks within the type. |
 |  [create(payload, options)](./scopedclient.md#create-method) | Creates a task and saves it to the database. |
 |  [delete(filter)](./scopedclient.md#delete-method) | Deletes tasks of the scoped type, optionally filtered to a custom group of tasks within the type. |
 |  [deleteOne(id)](./scopedclient.md#deleteOne-method) | Delete the task from the database. The operation is idempotent and will succeed even if the task has already been deleted. |
@@ -27,6 +28,28 @@ class ScopedTaskClient
 |  [listSummary(options)](./scopedclient.md#listSummary-method) | Retrieves a all tasks of the given type with the entire payload omitted by default. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
 
 ## Method Details
+
+<a id="count-method"></a>
+
+### count(filter)
+
+Compute the number of tasks of the given type that currently exist, optionally filtered to a custom group of tasks within the type.
+
+<b>Signature:</b>
+
+```typescript
+count(filter?: QueryType.Bool): Promise<number>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to include |
+
+<b>Returns:</b>
+
+`Promise<number>`
 
 <a id="create-method"></a>
 

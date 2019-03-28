@@ -18,7 +18,7 @@ interface TaskClientRequestContext
 |  [operation](./taskclientrequestcontext.md#operation-property) | [TaskClientOperation](../enums/taskclientoperation.md) | The operation that is being performed |
 |  [ref](./taskclientrequestcontext.md#ref-property) | `string` | Reference to the database entity that the operation is running against. This will typically either be the url of a single Cosmos DB document or the url of the container/collection. |
 |  [ruConsumption](./taskclientrequestcontext.md#ruConsumption-property) | `number` | The Cosmos DB Request Units consumed by the operation (if any) |
-|  [type](./taskclientrequestcontext.md#type-property) | `string` | The type of job(s) that the request is scoped to (if any) |
+|  [type](./taskclientrequestcontext.md#type-property) | `string` | The type of task(s) that the request is scoped to (if any) |
 
 ## Property Details
 
@@ -74,7 +74,7 @@ ruConsumption?: number;
 
 ### type
 
-The type of job(s) that the request is scoped to (if any)
+The type of task(s) that the request is scoped to (if any)
 
 <b>Signature:</b>
 

@@ -18,6 +18,7 @@ import serializeProjection from './projection';
  */
 export default function build(config: {
   limit?: number;
+  rawProjection?: string;
   projection?: Type.AnyProperty[];
   filter?: Type.Bool;
   sort?: Type.Num;
@@ -38,10 +39,11 @@ export default function build(config: {
         } as Required<SqlQuerySpec>)
       : undefined;
 
-  const projection =
-    config.projection !== undefined
-      ? serializeProjection(config.projection)
-      : '*';
+  const projection = config.rawProjection
+    ? config.rawProjection
+    : config.projection !== undefined
+    ? serializeProjection(config.projection)
+    : '*';
 
   const filter =
     config.filter !== undefined
