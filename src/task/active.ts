@@ -568,44 +568,61 @@ export default class ActiveTaskImpl<T> extends EventEmitter
     // Continually attempt to renew the lock as long as we are still able to
     // renew the lock.
     while (this._canRenewLock) {
-      const cancel = Symbol('CANCEL');
+      let cancelled = false;
 
       try {
         await this._interceptor.task(
           this,
           Interceptors.TaskOperation.RenewLock,
           this._data.ref,
-          async () =>
-            this._data.patch(() => {
-              if (!this._canRenewLock) {
-                throw cancel;
+          async () => {
+            const cancel = Symbol('CANCEL');
+            try {
+              return await this._data.patch(() => {
+                if (!this._canRenewLock) {
+                  throw cancel;
+                }
+
+                return {
+                  lockedUntilTime:
+                    this._data.timestamp() + this._options.lockDurationMs,
+                  lockToken
+                };
+              }, true);
+            } catch (err) {
+              // We ignore the error, but mark it cancelled if it is our cancel
+              // symbol. If not, we re-throw the error.
+              if (err === cancel) {
+                cancelled = true;
+                return {
+                  result: undefined,
+                  ruConsumption: undefined
+                };
               }
 
-              return {
-                lockedUntilTime:
-                  this._data.timestamp() + this._options.lockDurationMs,
-                lockToken
-              };
-            }, true)
+              throw err;
+            }
+          }
         );
 
         // Once we have renewed the lock, store the new lock token so we
         // can be sure we own the lock.
-        this._lockToken = lockToken;
-        this.emit('lockRenewed');
-      } catch (err) {
-        // We break out of our loop for cancelled operations
-        // TODO: will the error be in the log?
-        if (err === cancel) {
-          return;
+        if (!cancelled) {
+          this._lockToken = lockToken;
+          this.emit('lockRenewed');
         }
-
-        // Swallow other errors
+      } catch (err) {
+        // Swallow errors
       } finally {
         // Clear out the next lock token tracker if appropriate
         // regardless of the outcome
         if (this._nextLockToken === lockToken) {
           this._nextLockToken = undefined;
+        }
+
+        // We break out of our loop for cancelled operations
+        if (cancelled) {
+          return;
         }
       }
     }

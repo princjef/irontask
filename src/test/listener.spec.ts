@@ -1014,6 +1014,57 @@ describe('Listener', () => {
 
       expect(processingInterceptor).toHaveBeenCalledTimes(1);
     });
+
+    it('does not throw an error to the interceptor when cancelled before renewing the lock', async () => {
+      const type = 'listen-renewLockInterceptor';
+      let createdTask: Task<any>;
+
+      let renewLockCount = 0;
+
+      const scoped = getClient({
+        interceptors: {
+          async task(ctx, next) {
+            try {
+              if (ctx.operation === Interceptors.TaskOperation.RenewLock) {
+                renewLockCount += 1;
+                expect(ctx.task.id).toBe(createdTask.id);
+                expect(ctx.task.type).toBe(type);
+              }
+
+              await next();
+
+              if (ctx.operation === Interceptors.TaskOperation.RenewLock) {
+                // The lock renewal should not have actually happened
+                expect(ctx.ruConsumption).toBeUndefined();
+              }
+            } catch (err) {
+              fail(new Error('should not have thrown'));
+              throw err;
+            }
+          }
+        }
+      }).type(type);
+
+      createdTask = await scoped.create({ initial: 'data' });
+
+      const listener = scoped.listen<any>(
+        async task => {
+          await task.release();
+        },
+        {
+          lockDurationMs: 25
+        }
+      );
+
+      await waitForProcessing(listener);
+
+      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+
+      const afterTask = await scoped.get<any>(createdTask.id);
+      expect(afterTask).toBeDefined();
+
+      expect(renewLockCount).toBe(1);
+    });
   });
 });
 
