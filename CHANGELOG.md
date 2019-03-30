@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/princjef/irontask/compare/v1.0.0...v1.0.1) (2019-03-30)
+
+
+### Bug Fixes
+
+* **processing:** don't throw an error on renew lock for cancel ([#12](https://github.com/princjef/irontask/issues/12)) ([66d40a3](https://github.com/princjef/irontask/commit/66d40a3)), closes [#11](https://github.com/princjef/irontask/issues/11)
+
 # 1.0.0 (2019-03-28)
 
 
