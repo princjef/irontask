@@ -605,11 +605,14 @@ export default class ActiveTaskImpl<T> extends EventEmitter
           }
         );
 
-        // Once we have renewed the lock, store the new lock token so we
-        // can be sure we own the lock.
+        // Once we have renewed the lock, store the new lock token so we can be
+        // sure we own the lock, schedule the next renewal, and clear out of the
+        // renewal loop.
         if (!cancelled) {
           this._lockToken = lockToken;
           this.emit('lockRenewed');
+          this._scheduleRenewLock();
+          return;
         }
       } catch (err) {
         // Swallow errors

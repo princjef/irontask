@@ -145,6 +145,41 @@ describe('Listener', () => {
     expect(afterTask!.payload).toEqual({ updated: 'data' });
   });
 
+  it('renews the lock multiple times if necessary', async () => {
+    const scoped = client.type('listen-renewLock');
+
+    const task = await scoped.create({ initial: 'data' });
+
+    const lockRenewedSpy = jest.fn();
+
+    const listener = scoped.listen<any>(
+      async task => {
+        task.on('lockRenewed', lockRenewedSpy);
+        task.payload = { updated: 'data' };
+        await new Promise<void>(resolve => setTimeout(resolve, 2000));
+        task.removeListener('lockRenewed', lockRenewedSpy);
+      },
+      {
+        lockDurationMs: 1200
+      }
+    );
+
+    await waitForProcessing(listener);
+
+    // The lock should have been renewed twice, no more, no less
+    expect(lockRenewedSpy).toHaveBeenCalledTimes(2);
+
+    const afterTask = await scoped.get<any>(task.id);
+    expect(afterTask).toBeDefined();
+    expect(afterTask!.status).toBe(TaskStatus.Completed);
+    expect(afterTask!.nextRunTime).toBeUndefined();
+    expect(afterTask!.runs).toBe(1);
+    expect(afterTask!.lastRun).toBeDefined();
+    expect(afterTask!.lastRun!.succeeded).toBe(true);
+    expect(afterTask!.currentRunStartTime).toBeUndefined();
+    expect(afterTask!.payload).toEqual({ updated: 'data' });
+  });
+
   it('retries if the handler throws', async () => {
     const scoped = client.type('listen-throw');
 
