@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/princjef/irontask/compare/v1.0.1...v1.0.2) (2019-04-09)
+
+
+### Bug Fixes
+
+* **processing:** prevent loop of lock renewals on success ([#14](https://github.com/princjef/irontask/issues/14)) ([f420424](https://github.com/princjef/irontask/commit/f420424)), closes [#13](https://github.com/princjef/irontask/issues/13)
+
 ## [1.0.1](https://github.com/princjef/irontask/compare/v1.0.0...v1.0.1) (2019-03-30)
 
 
