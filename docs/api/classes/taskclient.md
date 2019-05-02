@@ -104,6 +104,8 @@ count(type: string, filter?: QueryType.Bool): Promise<number>;
 
 Compute the number of tasks across all types that currently exist, optionally filtered to a custom group of tasks.
 
+Performing operations across multiple types results in cross partition queries to Cosmos DB. This can cause a significant performance impact, especially when paging and/or sorting results. Use this API with care.
+
 <b>Signature:</b>
 
 ```typescript
