@@ -13,6 +13,10 @@
     "CosmosDB",
     "persistent"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/princjef/irontask.git"
+  },
   "author": "Microsoft",
   "license": "MIT",
   "engines": {
