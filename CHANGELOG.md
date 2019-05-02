@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/princjef/irontask/compare/v1.0.2...v1.0.3) (2019-05-02)
+
+
+### Bug Fixes
+
+* **configuration:** add repository configuration ([#15](https://github.com/princjef/irontask/issues/15)) ([35c36c6](https://github.com/princjef/irontask/commit/35c36c6))
+
 ## [1.0.2](https://github.com/princjef/irontask/compare/v1.0.1...v1.0.2) (2019-04-09)
 
 
