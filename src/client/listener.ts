@@ -5,7 +5,7 @@
 
 import { EventEmitter } from 'events';
 
-import * as uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
 
 import { LISTEN_RETRY_TIMEOUTS } from '../constants';
 import IronTaskError, { ErrorCode } from '../error';

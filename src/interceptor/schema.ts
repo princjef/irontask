@@ -15,8 +15,8 @@ namespace Interceptors {
   /**
    * Interceptor function for handling client-level requests.
    *
-   * @param context Metadata about the intercepted request
-   * @param next    Function to call that will run the intercepted request
+   * @param context - Metadata about the intercepted request
+   * @param next    - Function to call that will run the intercepted request
    */
   export type ClientRequestInterceptor = (
     context: TaskClientRequestContext,
@@ -26,8 +26,8 @@ namespace Interceptors {
   /**
    * Interceptor function for handling task-level requests.
    *
-   * @param context Metadata about the intercepted request
-   * @param next    Function to call that will run the intercepted request
+   * @param context - Metadata about the intercepted request
+   * @param next    - Function to call that will run the intercepted request
    */
   export type TaskRequestInterceptor = (
     context: TaskRequestContext,
@@ -37,8 +37,8 @@ namespace Interceptors {
   /**
    * Interceptor function for handling processing requests.
    *
-   * @param context Metadata about the intercepted processing request
-   * @param next    Function to call that will run the intercepted request
+   * @param context - Metadata about the intercepted processing request
+   * @param next    - Function to call that will run the intercepted request
    */
   export type ProcessingInterceptor = (
     context: ProcessingContext,

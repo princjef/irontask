@@ -4,7 +4,7 @@
  */
 
 import { CosmosClient } from '@azure/cosmos';
-import * as uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
 
 import { TaskClient, TaskClientOptions } from '..';
 

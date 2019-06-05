@@ -141,11 +141,6 @@ export default class ReadonlyTaskImpl<T> implements ReadonlyTask<T> {
  * produced from operations that only provide a partial copy of the payload,
  * such as {@link TaskClient.listSummary} and {@link TaskClient.iterateSummary}.
  *
- * @typeParam T   - Type of the task's payload data. Can be any type, but the
- *                  data should be directly serializable to JSON. This type can
- *                  also be tailored to the data projected by the operation that
- *                  produced this task.
- *
  * @public
  */
 export interface ReadonlyTask<T> extends TaskBase<T> {

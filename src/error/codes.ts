@@ -8,6 +8,7 @@
  *
  * @public
  */
+// tslint:disable:naming-convention
 enum ErrorCode {
   /**
    * The database account DNS could not be located (ENOTFOUND)

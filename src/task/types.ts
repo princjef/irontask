@@ -7,9 +7,6 @@
  * Base data and functionality that is common to tasks created and used in any
  * context.
  *
- * @typeParam T   - Type of the task's payload data. Can be any type, but the
- *                  data should be directly serializable to JSON.
- *
  * @public
  */
 export interface TaskBase<T> {
@@ -161,9 +158,6 @@ export interface TaskBase<T> {
  * Representation of a task converted to a plain JSON object. Created by {@link
  * TaskBase.toJSON} and derivatives.
  *
- * @typeParam T   - Type of the task's payload data. Can be any type, but the
- *                  data should be directly serializable to JSON.
- *
  * @public
  */
 export interface SerializedTask<T> {
@@ -307,9 +301,6 @@ export interface SerializedTask<T> {
 /**
  * Representation of a task that is currently being processed converted to a
  * plain JSON object. Created by {@link ActiveTask.toJSON}.
- *
- * @typeParam T   - Type of the task's payload data. Can be any type, but the
- *                  data should be directly serializable to JSON.
  *
  * @public
  */

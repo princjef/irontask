@@ -4,7 +4,7 @@
  */
 
 import { SqlQuerySpec } from '@azure/cosmos';
-import * as uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
 
 import {
   DEFAULT_RETRY_OPTIONS,
@@ -54,9 +54,9 @@ if (!Symbol.asyncIterator) {
 /**
  * The primary client for creating, updating, querying and processing tasks. It
  * wraps an Azure Cosmos DB collection, which is used to store the tasks. It's
- * recommended that you create one using the {@link TaskClient.(create:static,0)}
- * method instead of using the constructor. This will set up the database,
- * collection and necessary stored procedures for you.
+ * recommended that you create one using the TaskClient.create method instead of
+ * using the constructor. This will set up the database, collection and
+ * necessary stored procedures for you.
  *
  * @public
  */
@@ -107,7 +107,7 @@ export default class TaskClient {
   /**
    * Create a client using a pre-initialized Azure Cosmos DB client. Usage of
    * this API is only recommended for advanced users. Most users should use
-   * the {@link TaskClient.(create:static,0)} method instead.
+   * the TaskClient.create method instead.
    *
    * @param cosmosClient    - Client created from a {@link
    *                          @azure/cosmos#Container} that is scoped to the
