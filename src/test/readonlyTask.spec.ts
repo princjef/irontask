@@ -31,7 +31,7 @@ describe('ReadonlyTask', () => {
     await cleanup();
   });
 
-  describe('#enable', async () => {
+  describe('#enable', () => {
     const type = 'enable-task';
 
     afterAll(async () => {
@@ -109,7 +109,7 @@ describe('ReadonlyTask', () => {
     });
   });
 
-  describe('#disable', async () => {
+  describe('#disable', () => {
     const type = 'disable-task';
 
     afterAll(async () => {
@@ -187,7 +187,7 @@ describe('ReadonlyTask', () => {
     });
   });
 
-  describe('#delete', async () => {
+  describe('#delete', () => {
     const type = 'delete-task';
 
     afterAll(async () => {
@@ -226,7 +226,7 @@ describe('ReadonlyTask', () => {
     });
   });
 
-  describe('#toJSON', async () => {
+  describe('#toJSON', () => {
     const type = 'toJson-task';
 
     afterAll(async () => {
@@ -247,6 +247,9 @@ describe('ReadonlyTask', () => {
       expect(serialized.enabled).toBe(task.enabled);
       expect(serialized.createTime).toBe(task.createTime.toISOString());
       expect(serialized.nextRunTime).toBe(task.nextRunTime!.toISOString());
+      expect(serialized.lastUpdatedTime).toBe(
+        task.lastUpdatedTime.toISOString()
+      );
       expect(serialized.lastRun).toBeUndefined();
       expect(serialized.currentRunStartTime).toBeUndefined();
       expect(serialized.deliveries).toBe(task.deliveries);
@@ -257,7 +260,7 @@ describe('ReadonlyTask', () => {
     });
   });
 
-  describe('util inspect', async () => {
+  describe('util inspect', () => {
     const type = 'utilInspect-task';
 
     afterAll(async () => {

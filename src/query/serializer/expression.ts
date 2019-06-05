@@ -16,7 +16,8 @@ import Type from '../types';
  */
 export default function serializeExpression(
   expression: Type.Any,
-  paramIndex: number = 0
+  paramIndex: number = 0,
+  isProjection: boolean = false
 ): Required<SqlQuerySpec> {
   if (isCustom(expression)) {
     // This is one of our custom expressions. Process it
@@ -28,14 +29,14 @@ export default function serializeExpression(
       case PropSymbol.SPATIAL:
       case PropSymbol.OBJECT:
       case PropSymbol.ARRAY:
-        return serializers.property(expression, paramIndex);
+        return serializers.property(expression, paramIndex, isProjection);
 
       case OpSymbol.AND:
       case OpSymbol.OR:
-        return serializers.binaryLogical(expression, paramIndex);
+        return serializers.binaryLogical(expression, paramIndex, isProjection);
 
       case OpSymbol.NOT:
-        return serializers.unaryLogical(expression, paramIndex);
+        return serializers.unaryLogical(expression, paramIndex, isProjection);
 
       case OpSymbol.ADD:
       case OpSymbol.SUBTRACT:
@@ -55,19 +56,23 @@ export default function serializeExpression(
       case OpSymbol.LESS_THAN:
       case OpSymbol.LESS_THAN_OR_EQUAL:
       case OpSymbol.COALESCE:
-        return serializers.binaryOperator(expression, paramIndex);
+        return serializers.binaryOperator(expression, paramIndex, isProjection);
 
       case OpSymbol.CONCATENATE:
-        return serializers.concat(expression, paramIndex);
+        return serializers.concat(expression, paramIndex, isProjection);
 
       case OpSymbol.TERNARY:
-        return serializers.ternaryOperator(expression, paramIndex);
+        return serializers.ternaryOperator(
+          expression,
+          paramIndex,
+          isProjection
+        );
 
       case OpSymbol.IN:
-        return serializers.inOp(expression, paramIndex);
+        return serializers.inOp(expression, paramIndex, isProjection);
 
       case FnSymbol.PI:
-        return serializers.pi(expression, paramIndex);
+        return serializers.pi(expression, paramIndex, isProjection);
 
       case FnSymbol.ABS:
       case FnSymbol.ACOS:
@@ -107,7 +112,7 @@ export default function serializeExpression(
       case FnSymbol.ARRAY_LENGTH:
       case FnSymbol.ST_ISVALID:
       case FnSymbol.ST_ISVALIDDETAILED:
-        return serializers.unaryFn(expression, paramIndex);
+        return serializers.unaryFn(expression, paramIndex, isProjection);
 
       case FnSymbol.ATN2:
       case FnSymbol.LOG:
@@ -122,16 +127,16 @@ export default function serializeExpression(
       case FnSymbol.ST_DISTANCE:
       case FnSymbol.ST_WITHIN:
       case FnSymbol.ST_INTERSECTS:
-        return serializers.binaryFn(expression, paramIndex);
+        return serializers.binaryFn(expression, paramIndex, isProjection);
 
       case FnSymbol.REPLACE:
       case FnSymbol.SUBSTRING:
       case FnSymbol.ARRAY_CONTAINS:
       case FnSymbol.ARRAY_SLICE:
-        return serializers.ternaryFn(expression, paramIndex);
+        return serializers.ternaryFn(expression, paramIndex, isProjection);
 
       case FnSymbol.ARRAY_CONCAT:
-        return serializers.arrayConcat(expression, paramIndex);
+        return serializers.arrayConcat(expression, paramIndex, isProjection);
 
       default:
         throw new TypeError('Unrecognized Cosmos DB SQL query builder');
@@ -163,7 +168,8 @@ export default function serializeExpression(
 namespace serializers {
   export function property(
     expr: Type.AnyProperty,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [, first, rest] = expr;
     const propsStr = [first, ...rest]
@@ -185,6 +191,18 @@ namespace serializers {
         return `[${JSON.stringify(prop)}]`;
       })
       .join('');
+
+    // _ts is a special snowflake that we have to deal with because its time is
+    // represented in seconds, not milliseconds. As a result, if we find that
+    // the property is _ts, we multiply it by 1000 for use in expressions, but
+    // not projections.
+    if (!isProjection && propsStr === '["_ts"]') {
+      return {
+        query: `(c${propsStr} * 1000)`,
+        parameters: []
+      };
+    }
+
     return {
       query: `c${propsStr}`,
       parameters: []
@@ -193,21 +211,24 @@ namespace serializers {
 
   export function binaryLogical(
     expr: Type.BinaryLogical,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [sym, expressions] = expr;
-    return op(sym, expressions, paramIndex);
+    return op(sym, expressions, paramIndex, isProjection);
   }
 
   export function unaryLogical(
     expr: Type.UnaryLogical,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [, expression] = expr;
     let runningParamIndex = paramIndex;
     const { query, parameters } = serializeExpression(
       expression as Type.Any,
-      runningParamIndex
+      runningParamIndex,
+      isProjection
     );
     runningParamIndex += parameters.length;
     return {
@@ -218,35 +239,39 @@ namespace serializers {
 
   export function binaryOperator(
     expr: Type.Arithmetic | Type.Equality | Type.Comparison | Type.Coalesce,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [sym, left, right] = expr;
-    return op(sym, [left, right], paramIndex);
+    return op(sym, [left, right], paramIndex, isProjection);
   }
 
   export function ternaryOperator(
     expr: Type.Ternary,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [, test, first, second] = expr;
     let runningParamIndex = paramIndex;
 
     const { query: testQuery, parameters: testParams } = serializeExpression(
       test,
-      runningParamIndex
+      runningParamIndex,
+      isProjection
     );
     runningParamIndex += testParams.length;
 
     const { query: firstQuery, parameters: firstParams } = serializeExpression(
       first,
-      runningParamIndex
+      runningParamIndex,
+      isProjection
     );
     runningParamIndex += firstParams.length;
 
     const {
       query: secondQuery,
       parameters: secondParams
-    } = serializeExpression(second, runningParamIndex);
+    } = serializeExpression(second, runningParamIndex, isProjection);
     runningParamIndex += secondParams.length;
 
     return {
@@ -257,21 +282,27 @@ namespace serializers {
 
   export function inOp(
     expr: Type.In,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [, value, candidates] = expr;
     let runningParamIndex = paramIndex;
 
     const { query: valueQuery, parameters: valueParams } = serializeExpression(
       value,
-      runningParamIndex
+      runningParamIndex,
+      isProjection
     );
     runningParamIndex += valueParams.length;
 
     const { subqueries, parameters } = candidates
       .filter(expr => expr !== undefined)
       .map(expr => {
-        const result = serializeExpression(expr, runningParamIndex);
+        const result = serializeExpression(
+          expr,
+          runningParamIndex,
+          isProjection
+        );
         runningParamIndex += result.parameters.length;
         return result;
       })
@@ -287,17 +318,19 @@ namespace serializers {
 
   export function concat(
     expr: Type.Concat,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [, first, second, rest] = expr;
-    return op(expr[0], [first, second, ...rest], paramIndex);
+    return op(expr[0], [first, second, ...rest], paramIndex, isProjection);
   }
 
   export function pi(
     expr: Type.EmptyMathFn,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
-    return fn(expr[0], [], paramIndex);
+    return fn(expr[0], [], paramIndex, isProjection);
   }
 
   export function unaryFn(
@@ -310,10 +343,11 @@ namespace serializers {
       | Type.ArrayLength
       | Type.StIsValid
       | Type.StIsValidDetailed,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [sym, expression] = expr;
-    return fn(sym, [expression], paramIndex);
+    return fn(sym, [expression], paramIndex, isProjection);
   }
 
   export function binaryFn(
@@ -325,10 +359,11 @@ namespace serializers {
       | Type.StDistance
       | Type.BinarySpatialFnBool
       | Type.LogMathFn,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [sym, first, second] = expression;
-    return fn(sym, [first, second], paramIndex);
+    return fn(sym, [first, second], paramIndex, isProjection);
   }
 
   export function ternaryFn(
@@ -337,30 +372,42 @@ namespace serializers {
       | Type.Substring
       | Type.ArrayContains
       | Type.ArraySlice,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [sym, first, second, third] = expression;
-    return fn(sym, [first, second, third], paramIndex);
+    return fn(sym, [first, second, third], paramIndex, isProjection);
   }
 
   export function arrayConcat(
     expression: Type.ArrayConcat,
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     const [, first, second, rest] = expression;
-    return fn(expression[0], [first, second, ...rest], paramIndex);
+    return fn(
+      expression[0],
+      [first, second, ...rest],
+      paramIndex,
+      isProjection
+    );
   }
 
   function op(
     sym: Exclude<OpSymbol, typeof OpSymbol.TERNARY>,
     expressions: Type.Any[],
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     let runningParamIndex = paramIndex;
     const { subqueries, parameters } = expressions
       .filter(expr => expr !== undefined)
       .map(expr => {
-        const result = serializeExpression(expr, runningParamIndex);
+        const result = serializeExpression(
+          expr,
+          runningParamIndex,
+          isProjection
+        );
         runningParamIndex += result.parameters.length;
         return result;
       })
@@ -374,7 +421,8 @@ namespace serializers {
   function fn(
     sym: FnSymbol,
     expressions: (Type.Any | undefined)[],
-    paramIndex: number
+    paramIndex: number,
+    isProjection: boolean
   ): Required<SqlQuerySpec> {
     let runningParamIndex = paramIndex;
     const { subqueries, parameters } = expressions

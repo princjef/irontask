@@ -56,6 +56,14 @@ export interface TaskBase<T> {
   readonly nextRunTime?: Date;
 
   /**
+   * Date representing the last time the task was updated, either explicitly or
+   * as a part of task processing.
+   *
+   * @public
+   */
+  readonly lastUpdatedTime: Date;
+
+  /**
    * Metadata about the most recent completed/failed run of the task. If the
    * task has never completed or failed a run, this is undefined.
    *
@@ -205,6 +213,14 @@ export interface SerializedTask<T> {
    * @public
    */
   nextRunTime?: string;
+
+  /**
+   * ISO date string representing the last time the task was updated, either
+   * explicitly or as a part of task processing.
+   *
+   * @public
+   */
+  lastUpdatedTime: string;
 
   /**
    * Metadata about the most recent completed/failed run of the task. If the

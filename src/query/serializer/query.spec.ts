@@ -110,6 +110,19 @@ describe('#buildQuery', () => {
     });
   });
 
+  it('sort with _ts', () => {
+    expect(
+      normalize(
+        buildQuery({
+          sort: p.num('_ts')
+        })
+      )
+    ).toEqual({
+      query: 'SELECT * FROM c ORDER BY c["_ts"] ASC',
+      parameters: []
+    });
+  });
+
   it('everything', () => {
     expect(
       normalize(

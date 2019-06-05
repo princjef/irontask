@@ -61,6 +61,12 @@ namespace t {
   );
 
   /**
+   * Unix ms epoch representing the last time the task was updated, either
+   * explicitly or as part of processing.
+   */
+  export const lastUpdatedTime: QueryType.NumericProperty = p.num('_ts');
+
+  /**
    * Metadata about the most recent completed/failed run of the task. If the
    * task has neither failed a run, this is undefined.
    *

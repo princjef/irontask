@@ -27,6 +27,7 @@ interface SerializedTask<T>
 |  [id](./serializedtask.md#id-property) | `string` | Unique identifier for the task |
 |  [interval](./serializedtask.md#interval-property) | `string \| number` | If defined, the schedule on which to run the task. If it is a number, it represents the number of milliseconds between each run of the task. If it is a string, it is a cron string indicating the schedule on which to run. |
 |  [lastRun](./serializedtask.md#lastRun-property) | <pre>{&#010;    startTime: string;&#010;    finishTime: string;&#010;    succeeded: boolean;&#010;}</pre> | Metadata about the most recent completed/failed run of the task. If the task has never completed or failed a run, this is undefined. |
+|  [lastUpdatedTime](./serializedtask.md#lastUpdatedTime-property) | `string` | ISO date string representing the last time the task was updated, either explicitly or as a part of task processing. |
 |  [nextRunTime](./serializedtask.md#nextRunTime-property) | `string` | ISO date string representing the next time the task should be processed. Can be earlier than the current time if the task is pending or currently running and is undefined if the task is not running and has no future runs scheduled. |
 |  [payload](./serializedtask.md#payload-property) | `T` | User-defined payload holding information about the task. |
 |  [runs](./serializedtask.md#runs-property) | `number` | Number of times task processing has run to completion, regardless of whether they ultimately succeeded or failed. This number only includes previously completed runs. For one-time tasks, this will only ever be 0 or 1, but can be arbitrarily large for recurring tasks that have run many times. |
@@ -135,6 +136,18 @@ lastRun?: {
         finishTime: string;
         succeeded: boolean;
     };
+```
+
+<a id="lastUpdatedTime-property"></a>
+
+### lastUpdatedTime
+
+ISO date string representing the last time the task was updated, either explicitly or as a part of task processing.
+
+<b>Signature:</b>
+
+```typescript
+lastUpdatedTime: string;
 ```
 
 <a id="nextRunTime-property"></a>

@@ -60,6 +60,10 @@ export default class ReadonlyTaskImpl<T> implements ReadonlyTask<T> {
     return this._data.nextRunTime;
   }
 
+  get lastUpdatedTime(): Date {
+    return this._data.lastUpdatedTime;
+  }
+
   get lastRun():
     | { startTime: Date; finishTime: Date; succeeded: boolean }
     | undefined {

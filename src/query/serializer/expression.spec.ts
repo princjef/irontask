@@ -332,6 +332,11 @@ describe('#serializeExpression', () => {
       p.base('a', 1, 'c'),
       'c["a"][1]["c"]'
     );
+    testSimpleQuery(
+      '_ts (requires multiplication)',
+      p.num('_ts'),
+      '(c["_ts"] * 1000)'
+    );
 
     it('throws if the path is empty', () => {
       expect(() => serializeExpression((p.base as any)())).toThrow(TypeError);

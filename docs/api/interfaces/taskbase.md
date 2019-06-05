@@ -29,6 +29,7 @@ interface TaskBase<T>
 |  [id](./taskbase.md#id-property) | `string` | Unique identifier for the task |
 |  [interval](./taskbase.md#interval-property) | `string \| number` | If defined, the schedule on which to run the task. If it is a number, it represents the number of milliseconds between each run of the task. If it is a string, it is a cron string indicating the schedule on which to run. |
 |  [lastRun](./taskbase.md#lastRun-property) | <pre>{&#010;    readonly startTime: Date;&#010;    readonly finishTime: Date;&#010;    readonly succeeded: boolean;&#010;}</pre> | Metadata about the most recent completed/failed run of the task. If the task has never completed or failed a run, this is undefined. |
+|  [lastUpdatedTime](./taskbase.md#lastUpdatedTime-property) | `Date` | Date representing the last time the task was updated, either explicitly or as a part of task processing. |
 |  [nextRunTime](./taskbase.md#nextRunTime-property) | `Date` | Date representing the next time the task should be processed. Can be earlier than the current time if the task is pending or currently running and is undefined if the task is not running and has no future runs scheduled. |
 |  [payload](./taskbase.md#payload-property) | `T` | User-defined payload holding information about the task. |
 |  [runs](./taskbase.md#runs-property) | `number` | Number of times task processing has run to completion, regardless of whether they ultimately succeeded or failed. This number only includes previously completed runs. For one-time tasks, this will only ever be 0 or 1, but can be arbitrarily large for recurring tasks that have run many times. |
@@ -143,6 +144,18 @@ readonly lastRun?: {
         readonly finishTime: Date;
         readonly succeeded: boolean;
     };
+```
+
+<a id="lastUpdatedTime-property"></a>
+
+### lastUpdatedTime
+
+Date representing the last time the task was updated, either explicitly or as a part of task processing.
+
+<b>Signature:</b>
+
+```typescript
+readonly lastUpdatedTime: Date;
 ```
 
 <a id="nextRunTime-property"></a>
