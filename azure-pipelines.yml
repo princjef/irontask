@@ -22,10 +22,12 @@ jobs:
 
   - job: test
     pool: Hosted VS2017
+    timeoutInMinutes: 30
     steps:
       # Requires this third party task: https://marketplace.visualstudio.com/items?itemName=azure-cosmosdb.emulator-public-preview
       - task: azure-cosmosdb.emulator-public-preview.run-cosmosdbemulatorcontainer.CosmosDbEmulator@2
         displayName: Run Azure Cosmos DB Emulator
+        timeoutInMinutes: 30
       - task: NodeTool@0
         inputs:
           versionSpec: 8.x
