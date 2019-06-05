@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 
 import * as jsonpatch from 'json-merge-patch';
 import cloneDeep = require('lodash.clonedeep');
-import * as Queue from 'p-queue';
+import Queue from 'p-queue';
 
 import { CosmosDbClient } from '../client';
 import IronTaskError, { ErrorCode } from '../error';

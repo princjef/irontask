@@ -1116,6 +1116,7 @@ describe('Client', () => {
       const iterator = client.iterate<any>(type);
 
       let index = 0;
+      // tslint:disable-next-line:naming-convention
       for await (const _ of iterator) {
         index += 1;
       }
@@ -1569,6 +1570,7 @@ describe('Client', () => {
       const iterator = client.iterateSummary<any>(type);
 
       let index = 0;
+      // tslint:disable-next-line:naming-convention
       for await (const _ of iterator) {
         index += 1;
       }

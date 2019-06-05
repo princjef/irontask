@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 import * as util from 'util';
 
 import { createTimeout } from 'retry';
-import * as uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
 
 import { CosmosDbClient, ListenOptions } from '../client';
 import { LOCK_RATIO } from '../constants';
@@ -774,9 +774,6 @@ interface LogMeta {
  * Listener}. It provides the ability to see information and update values of
  * the task like when working with a {@link Task}, but also has additional
  * functionality specific to processing, such as completing, retrying, etc.
- *
- * @typeParam T   - Type of the task's payload data. Can be any type, but the
- *                  data should be directly serializable to JSON.
  *
  * @public
  */

@@ -148,12 +148,8 @@ export default class TaskImpl<T> implements Task<T> {
 
 /**
  * General representation of a task. It is returned by many methods such as
- * {@link TaskClient.(create:instance,0)}, {@link TaskClient.get} and {@link
- * TaskClient.list}. You should never need to create an instance of this class
- * directly.
- *
- * @typeParam T   - Type of the task's payload data. Can be any type, but the
- *                  data should be directly serializable to JSON.
+ * TaskClient.create, {@link TaskClient.get} and {@link TaskClient.list}. You
+ * should never need to create an instance of this class directly.
  *
  * @public
  */

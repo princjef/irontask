@@ -2,7 +2,7 @@
 
 # Interface Task
 
-General representation of a task. It is returned by many methods such as , [TaskClient.get()](../classes/taskclient.md#get-method) and [TaskClient.list()](../classes/taskclient.md#list-method)<!-- -->. You should never need to create an instance of this class directly.
+General representation of a task. It is returned by many methods such as TaskClient.create, [TaskClient.get()](../classes/taskclient.md#get-method) and [TaskClient.list()](../classes/taskclient.md#list-method)<!-- -->. You should never need to create an instance of this class directly.
 
 <b>Signature:</b>
 

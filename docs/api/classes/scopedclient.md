@@ -4,6 +4,8 @@
 
 Version of [TaskClient](./taskclient.md) that has all of its operations automatically scoped to a single task type.
 
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `ScopedTaskClient` class.
+
 <b>Signature:</b>
 
 ```typescript

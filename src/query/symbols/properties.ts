@@ -8,6 +8,7 @@
 /**
  * @public
  */
+// tslint:disable:naming-convention
 namespace PropSymbol {
   /**
    * @public

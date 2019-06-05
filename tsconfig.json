@@ -11,6 +11,7 @@
     "noUnusedLocals": true,
     "suppressImplicitAnyIndexErrors": true,
     "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
     "newLine": "lf",
     "rootDir": "src",
     "outDir": "dist",

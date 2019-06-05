@@ -2,7 +2,9 @@
 
 # Class TaskClient
 
-The primary client for creating, updating, querying and processing tasks. It wraps an Azure Cosmos DB collection, which is used to store the tasks. It's recommended that you create one using the  method instead of using the constructor. This will set up the database, collection and necessary stored procedures for you.
+The primary client for creating, updating, querying and processing tasks. It wraps an Azure Cosmos DB collection, which is used to store the tasks. It's recommended that you create one using the TaskClient.create method instead of using the constructor. This will set up the database, collection and necessary stored procedures for you.
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `TaskClient` class.
 
 <b>Signature:</b>
 
@@ -91,7 +93,7 @@ count(type: string, filter?: QueryType.Bool): Promise<number>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to include |
 
 <b>Returns:</b>
@@ -138,7 +140,7 @@ create<T>(type: string, payload: T, options?: CreateTaskOptions): Promise<Task<T
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  payload | `T` | Payload containing the data for the task |
 |  options | [CreateTaskOptions](../interfaces/createtaskoptions.md) | Options to configure the newly created task |
 
@@ -162,7 +164,7 @@ delete(type: string, filter?: QueryType.Bool): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to delete |
 
 <b>Returns:</b>
@@ -207,7 +209,7 @@ deleteOne(type: string, id: string): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  id | `string` | The task's id |
 
 <b>Returns:</b>
@@ -230,7 +232,7 @@ disable(type: string, filter?: QueryType.Bool): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to disable |
 
 <b>Returns:</b>
@@ -277,7 +279,7 @@ enable(type: string, filter?: QueryType.Bool): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  filter | [QueryType.Bool](../namespaces/querytype/types/bool.md) | Query filter specifying which tasks within the provided type to enable |
 
 <b>Returns:</b>
@@ -324,7 +326,7 @@ get<T>(type: string, id: string): Promise<Task<T> | undefined>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  id | `string` | The task's id |
 
 <b>Returns:</b>
@@ -349,7 +351,7 @@ iterate<T>(type: string, options?: IterateOptions): AsyncIterable<Task<T>>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  options | [IterateOptions](../interfaces/iterateoptions.md) | Options controlling which tasks to retrieve and the order in which to receive them |
 
 <b>Returns:</b>
@@ -430,7 +432,7 @@ iterateSummary<T>(type: string, options?: IterateSummaryOptions): AsyncIterable<
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  options | [IterateSummaryOptions](../interfaces/iteratesummaryoptions.md) | Options controlling which tasks to retrieve and the order in which to receive them |
 
 <b>Returns:</b>
@@ -453,7 +455,7 @@ list<T>(type: string, options?: ListOptions): Promise<Task<T>[]>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  options | [ListOptions](../interfaces/listoptions.md) | Options controlling which tasks to retrieve |
 
 <b>Returns:</b>
@@ -526,7 +528,7 @@ listen<T>(type: string, handler: TaskHandler<T>, options?: ListenOptions): Liste
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  handler | `TaskHandler<T>` | Function to call with each task received for processing. May be synchronous or asynchronous |
 |  options | [ListenOptions](../interfaces/listenoptions.md) | Options for configuring the listener |
 
@@ -552,7 +554,7 @@ listSummary<T>(type: string, options?: ListSummaryOptions): Promise<ReadonlyTask
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type |
 |  options | [ListSummaryOptions](../interfaces/listsummaryoptions.md) | Options controlling which tasks to retrieve |
 
 <b>Returns:</b>
@@ -590,7 +592,7 @@ type(type: string): ScopedTaskClient;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | `string` |  |
+|  type | `string` | Task type to apply to all operations within the scoped client. |
 
 <b>Returns:</b>
 

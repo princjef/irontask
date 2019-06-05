@@ -8,7 +8,7 @@
 |  --- | --- |
 |  [IronTaskError](./classes/irontaskerror.md) | Generic error class that is thrown for any internal library errors. |
 |  [ScopedClient](./classes/scopedclient.md) | Version of [TaskClient](./classes/taskclient.md) that has all of its operations automatically scoped to a single task type. |
-|  [TaskClient](./classes/taskclient.md) | The primary client for creating, updating, querying and processing tasks. It wraps an Azure Cosmos DB collection, which is used to store the tasks. It's recommended that you create one using the  method instead of using the constructor. This will set up the database, collection and necessary stored procedures for you. |
+|  [TaskClient](./classes/taskclient.md) | The primary client for creating, updating, querying and processing tasks. It wraps an Azure Cosmos DB collection, which is used to store the tasks. It's recommended that you create one using the TaskClient.create method instead of using the constructor. This will set up the database, collection and necessary stored procedures for you. |
 
 ## Enumerations
 
@@ -36,7 +36,7 @@
 |  [ReadonlyTask](./interfaces/readonlytask.md) | Representation of a task that cannot have its payload saved because it is produced from operations that only provide a partial copy of the payload, such as [TaskClient.listSummary()](./classes/taskclient.md#listSummary-method) and [TaskClient.iterateSummary()](./classes/taskclient.md#iterateSummary-method)<!-- -->. |
 |  [SerializedActiveTask](./interfaces/serializedactivetask.md) | Representation of a task that is currently being processed converted to a plain JSON object. Created by [ActiveTask.toJSON()](./interfaces/activetask.md#toJSON-method)<!-- -->. |
 |  [SerializedTask](./interfaces/serializedtask.md) | Representation of a task converted to a plain JSON object. Created by [TaskBase.toJSON()](./interfaces/taskbase.md#toJSON-method) and derivatives. |
-|  [Task](./interfaces/task.md) | General representation of a task. It is returned by many methods such as , [TaskClient.get()](./classes/taskclient.md#get-method) and [TaskClient.list()](./classes/taskclient.md#list-method)<!-- -->. You should never need to create an instance of this class directly. |
+|  [Task](./interfaces/task.md) | General representation of a task. It is returned by many methods such as TaskClient.create, [TaskClient.get()](./classes/taskclient.md#get-method) and [TaskClient.list()](./classes/taskclient.md#list-method)<!-- -->. You should never need to create an instance of this class directly. |
 |  [TaskBase](./interfaces/taskbase.md) | Base data and functionality that is common to tasks created and used in any context. |
 |  [TaskClientOptions](./interfaces/taskclientoptions.md) | Options for configuring the behavior of the [TaskClient](./classes/taskclient.md)<!-- -->. |
 |  [TaskFinishMetadata](./interfaces/taskfinishmetadata.md) | Information about the result of processing an [ActiveTask](./interfaces/activetask.md) and any metadata provided as part of finishing. |
