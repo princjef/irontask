@@ -56,7 +56,10 @@ export default function build(config: {
 
   const sort =
     config.sort !== undefined
-      ? serializeExpression(config.sort, paramIndex)
+      ? // Due to the fact that sort fields must be raw projections for now, we
+        // mark the expression as a projection.
+        // TODO: update this if Cosmos DB ever supports expressions in order by
+        serializeExpression(config.sort, paramIndex, true)
       : undefined;
 
   return {

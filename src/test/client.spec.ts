@@ -59,6 +59,11 @@ describe('Client', () => {
       expect(task.createTime.getTime()).toBeLessThanOrEqual(Date.now());
       expect(task.nextRunTime).toBeDefined();
       expect(task.nextRunTime!.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(task.lastUpdatedTime).toBeDefined();
+      // Allow an hour wiggle room since this is a server time
+      expect(task.lastUpdatedTime.getTime()).toBeGreaterThanOrEqual(
+        Date.now() - 1000 * 60 * 60
+      );
       expect(task.lastRun).toBeUndefined();
       expect(task.currentRunStartTime).toBeUndefined();
       expect(task.interval).toBeUndefined();
@@ -172,6 +177,11 @@ describe('Client', () => {
       expect(task.createTime.getTime()).toBeLessThanOrEqual(Date.now());
       expect(task.nextRunTime).toBeDefined();
       expect(task.nextRunTime!.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(task.lastUpdatedTime).toBeDefined();
+      // Allow an hour wiggle room since this is a server time
+      expect(task.lastUpdatedTime.getTime()).toBeGreaterThanOrEqual(
+        Date.now() - 1000 * 60 * 60
+      );
       expect(task.lastRun).toBeUndefined();
       expect(task.interval).toBeUndefined();
       expect(task.runs).toBe(0);
@@ -203,6 +213,7 @@ describe('Client', () => {
       expect(task!.status).toBe(createdTask.status);
       expect(task!.createTime).toEqual(createdTask.createTime);
       expect(task!.nextRunTime).toEqual(createdTask.nextRunTime);
+      expect(task!.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
       expect(task!.lastRun).toEqual(createdTask.lastRun);
       expect(task!.interval).toBe(createdTask.interval);
       expect(task!.runs).toBe(createdTask.runs);
@@ -227,6 +238,7 @@ describe('Client', () => {
       expect(task!.status).toBe(createdTask.status);
       expect(task!.createTime).toEqual(createdTask.createTime);
       expect(task!.nextRunTime).toEqual(createdTask.nextRunTime);
+      expect(task!.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
       expect(task!.lastRun).toEqual(createdTask.lastRun);
       expect(task!.interval).toBe(createdTask.interval);
       expect(task!.runs).toBe(createdTask.runs);
@@ -314,6 +326,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -423,6 +436,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -516,6 +530,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -688,6 +703,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -831,6 +847,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -926,6 +943,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -1139,6 +1157,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -1280,6 +1299,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -1382,6 +1402,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.interval).toBe(createdTask.interval);
         expect(task.runs).toBe(createdTask.runs);
@@ -1593,6 +1614,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.currentRunStartTime).toEqual(
           createdTask.currentRunStartTime
@@ -1770,6 +1792,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.currentRunStartTime).toEqual(
           createdTask.currentRunStartTime
@@ -1875,6 +1898,7 @@ describe('Client', () => {
         expect(task.status).toBe(createdTask.status);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.currentRunStartTime).toEqual(
           createdTask.currentRunStartTime
@@ -2615,6 +2639,11 @@ describe('Client', () => {
       expect(task.createTime.getTime()).toBeLessThanOrEqual(Date.now());
       expect(task.nextRunTime).toBeDefined();
       expect(task.nextRunTime!.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(task.lastUpdatedTime).toBeDefined();
+      // Allow an hour wiggle room since this is a server time
+      expect(task.lastUpdatedTime.getTime()).toBeGreaterThanOrEqual(
+        Date.now() - 1000 * 60 * 60
+      );
       expect(task.lastRun).toBeUndefined();
       expect(task.currentRunStartTime).toBeUndefined();
       expect(task.interval).toBeUndefined();

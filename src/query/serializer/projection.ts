@@ -23,7 +23,7 @@ export default function serializeProjection(
   for (const property of properties) {
     projection = addProperty(
       [property[1], ...property[2]],
-      buildExpression(property).query,
+      buildExpression(property, 0, true).query,
       projection
     );
   }

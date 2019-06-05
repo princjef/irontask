@@ -120,8 +120,8 @@ export function lock(
       task._self,
       task,
       { etag: task._etag },
-      (err: any, task: ResolvedTaskDocument<any> | undefined) =>
-        cb(err, task, index)
+      (err: any, updatedTask: ResolvedTaskDocument<any> | undefined) =>
+        cb(err, Object.assign({}, task, updatedTask), index)
     );
 
     if (!accepted) {

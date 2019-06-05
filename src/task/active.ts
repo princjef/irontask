@@ -69,6 +69,10 @@ export default class ActiveTaskImpl<T> extends EventEmitter
     return this._data.nextRunTime;
   }
 
+  get lastUpdatedTime(): Date {
+    return this._data.lastUpdatedTime;
+  }
+
   get lastRun():
     | { startTime: Date; finishTime: Date; succeeded: boolean }
     | undefined {

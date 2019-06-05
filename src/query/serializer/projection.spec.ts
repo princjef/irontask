@@ -60,6 +60,12 @@ describe('#serializeProjection', () => {
     );
   });
 
+  it('handles when _ts gets projected', () => {
+    expect(serializeProjection([p.num('_ts')])).toBe(
+      'VALUE { "_ts": c["_ts"] }'
+    );
+  });
+
   it('does not allow array properties on the top level', () => {
     expect(() => serializeProjection([p.base(0 as any)])).toThrow(TypeError);
   });

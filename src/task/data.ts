@@ -49,6 +49,11 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
       : undefined;
   }
 
+  get lastUpdatedTime(): Date {
+    // _ts is in seconds, so we multiply by 1000
+    return new Date(this.document._ts * 1000);
+  }
+
   get lastRun():
     | { startTime: Date; finishTime: Date; succeeded: boolean }
     | undefined {
@@ -355,6 +360,7 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
       enabled: this.enabled,
       createTime: this.createTime.toISOString(),
       nextRunTime: this.nextRunTime && this.nextRunTime.toISOString(),
+      lastUpdatedTime: this.lastUpdatedTime.toISOString(),
       lastRun: this.lastRun
         ? {
             startTime: this.lastRun.startTime.toISOString(),

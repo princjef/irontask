@@ -61,6 +61,9 @@ describe('Listener', () => {
       expect(task.enabled).toBe(createdTask.enabled);
       expect(task.createTime).toEqual(createdTask.createTime);
       expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+      expect(task.lastUpdatedTime.getTime()).toBeGreaterThanOrEqual(
+        createdTask.lastUpdatedTime.getTime()
+      );
       expect(task.lastRun).toEqual(createdTask.lastRun);
       expect(task.currentRunStartTime).toEqual(expect.any(Date));
       expect(task.deliveries).toBe(createdTask.deliveries);
@@ -83,6 +86,9 @@ describe('Listener', () => {
     expect(afterTask).toBeDefined();
     expect(afterTask!.status).toBe(TaskStatus.Completed);
     expect(afterTask!.nextRunTime).toBeUndefined();
+    expect(afterTask!.lastUpdatedTime.getTime()).toBeGreaterThanOrEqual(
+      createdTask.lastUpdatedTime.getTime()
+    );
     expect(afterTask!.runs).toBe(1);
     expect(afterTask!.lastRun).toBeDefined();
     expect(afterTask!.lastRun!.succeeded).toBe(true);
@@ -689,6 +695,7 @@ describe('Listener', () => {
         enabled: true,
         createTime: task.createTime,
         nextRunTime: task.nextRunTime!.toISOString(),
+        lastUpdatedTime: task.lastUpdatedTime.toISOString(),
         lastRun: undefined,
         currentRunStartTime: undefined,
         deliveries: 0,
@@ -947,6 +954,9 @@ describe('Listener', () => {
         expect(task.enabled).toBe(createdTask.enabled);
         expect(task.createTime).toEqual(createdTask.createTime);
         expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime.getTime()).toBeGreaterThanOrEqual(
+          createdTask.lastUpdatedTime.getTime()
+        );
         expect(task.lastRun).toEqual(createdTask.lastRun);
         expect(task.currentRunStartTime).toEqual(expect.any(Date));
         expect(task.deliveries).toBe(createdTask.deliveries);
