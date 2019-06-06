@@ -761,8 +761,8 @@ export default class ActiveTaskImpl<T> extends EventEmitter
     };
   }
 
-  // tslint:disable-next-line:function-name
-  [util.inspect.custom](depth: number, opts: any) {
+  // We cast as any so that types behave outside of this library
+  [util.inspect.custom as any](depth: number, opts: any) {
     return this.toJSON();
   }
 }
