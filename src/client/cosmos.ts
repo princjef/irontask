@@ -15,6 +15,7 @@ import {
 import { Response } from '@azure/cosmos/lib/src/request';
 
 import {
+  CONTINUATION_HEADER,
   DEFAULT_DATABASE_THROUGHPUT,
   INTERNAL_RETRY_OPTIONS,
   RU_HEADER,
@@ -123,6 +124,26 @@ export default class CosmosDbClient {
           enableCrossPartitionQuery: crossPartition
         })
         .toArray()
+    );
+  }
+
+  async queryItemsPage<T>(
+    query: SqlQuerySpec,
+    options: {
+      continuation?: string;
+      crossPartition?: boolean;
+      pageSize?: number;
+    }
+  ) {
+    return await this._wrap(async () =>
+      this._client.items
+        .query<T>(query, {
+          sessionToken: this._session,
+          enableCrossPartitionQuery: options.crossPartition,
+          continuation: options.continuation,
+          maxItemCount: options.pageSize
+        })
+        .executeNext()
     );
   }
 
@@ -255,6 +276,7 @@ export default class CosmosDbClient {
 
     return {
       ruConsumption: CosmosDbClient._getRu(response.headers),
+      continuation: CosmosDbClient._getContinuation(response.headers),
       result:
         'result' in response
           ? response.result!
@@ -343,6 +365,12 @@ export default class CosmosDbClient {
     return headers && headers[RU_HEADER]
       ? Number(headers[RU_HEADER])
       : undefined;
+  }
+
+  private static _getContinuation(
+    headers: IHeaders | undefined
+  ): string | undefined {
+    return headers && headers[CONTINUATION_HEADER];
   }
 
   private static _isCosmosError(err: any, ...codes: number[]) {

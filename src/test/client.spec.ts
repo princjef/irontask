@@ -447,6 +447,174 @@ describe('Client', () => {
     });
   });
 
+  describe('#listPaged', () => {
+    const type = 'listPaged-task';
+    const createdTasks: Task<any>[] = [];
+
+    beforeAll(async () => {
+      const startTime = Date.now();
+
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 3, group: 'a' },
+          {
+            scheduledTime: moment(startTime)
+              .add(15, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 2, group: 'b' },
+          {
+            scheduledTime: moment(startTime)
+              .subtract(1, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 1, group: 'a' },
+          {
+            scheduledTime: moment(startTime)
+              .add(20, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 0, group: 'b' },
+          {
+            scheduledTime: moment(startTime)
+              .add(12, 'minutes')
+              .toDate()
+          }
+        )
+      );
+    });
+
+    afterAll(async () => {
+      await client.delete(type);
+    });
+
+    it('returns results in no particular order by default', async () => {
+      const tasks = await client.listPaged<any>(type);
+
+      expect(tasks.length).toBe(createdTasks.length);
+      expect(tasks.continuation).toBeUndefined();
+    });
+
+    it('allows the sort to be overridden', async () => {
+      const tasks = await client.listPaged<any>(type, {
+        sortExpression: t.createTime,
+        pageSize: 3
+      });
+
+      expect(tasks.length).toBe(3);
+      expect(tasks.continuation).toEqual(expect.any(String));
+
+      const moreTasks = await client.listPaged<any>(type, {
+        sortExpression: t.createTime,
+        pageSize: 3,
+        continuation: tasks.continuation
+      });
+
+      expect(moreTasks.length).toBe(1);
+      expect(moreTasks.continuation).toBeUndefined();
+
+      tasks.push(...moreTasks);
+
+      for (const [index, task] of tasks.entries()) {
+        const createdTask = createdTasks[index];
+
+        expect(task.id).toBe(createdTasks[index].id);
+        expect(task.type).toBe(createdTask.type);
+        expect(task.enabled).toBe(createdTask.enabled);
+        expect(task.status).toBe(createdTask.status);
+        expect(task.createTime).toEqual(createdTask.createTime);
+        expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.interval).toBe(createdTask.interval);
+        expect(task.runs).toBe(createdTask.runs);
+        expect(task.attempts).toBe(createdTask.attempts);
+        expect(task.deliveries).toBe(createdTask.deliveries);
+        expect(task.payload).toEqual(createdTasks[index].payload);
+      }
+    });
+
+    it('allows filtering by any data in the task', async () => {
+      const tasks = await client.listPaged<any>(type, {
+        sortExpression: t.createTime,
+        filter: q.equal(t.payload('group'), 'a'),
+        pageSize: 1
+      });
+
+      expect(tasks.length).toBe(1);
+      expect(tasks.continuation).toEqual(expect.any(String));
+
+      const moreTasks = await client.listPaged<any>(type, {
+        sortExpression: t.createTime,
+        filter: q.equal(t.payload('group'), 'a'),
+        pageSize: 1,
+        continuation: tasks.continuation
+      });
+
+      expect(moreTasks.length).toBe(1);
+      expect(moreTasks.continuation).toBeUndefined();
+
+      tasks.push(...moreTasks);
+
+      expect(tasks[0].id).toBe(createdTasks[0].id);
+      expect(tasks[1].id).toBe(createdTasks[2].id);
+    });
+
+    it('works with a scoped client', async () => {
+      const tasks = await client.type(type).listPaged<any>({
+        sortExpression: t.createTime,
+        pageSize: 2
+      });
+
+      expect(tasks.length).toBe(2);
+      expect(tasks.continuation).toEqual(expect.any(String));
+
+      const moreTasks = await client.type(type).listPaged<any>({
+        sortExpression: t.createTime,
+        pageSize: 2,
+        continuation: tasks.continuation
+      });
+
+      expect(moreTasks.length).toBe(2);
+      expect(moreTasks.continuation).toBeUndefined();
+
+      tasks.push(...moreTasks);
+
+      for (const [index, task] of tasks.entries()) {
+        const createdTask = createdTasks[index];
+
+        expect(task.id).toBe(createdTasks[index].id);
+        expect(task.type).toBe(createdTask.type);
+        expect(task.enabled).toBe(createdTask.enabled);
+        expect(task.status).toBe(createdTask.status);
+        expect(task.createTime).toEqual(createdTask.createTime);
+        expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
+        expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.interval).toBe(createdTask.interval);
+        expect(task.runs).toBe(createdTask.runs);
+        expect(task.attempts).toBe(createdTask.attempts);
+        expect(task.deliveries).toBe(createdTask.deliveries);
+        expect(task.payload).toEqual(createdTasks[index].payload);
+      }
+    });
+  });
+
   describe('#listAll', () => {
     const types = ['list-all-task-1', 'list-all-task-2'];
     const createdTasks: Task<any>[] = [];
@@ -838,6 +1006,211 @@ describe('Client', () => {
       });
 
       expect(tasks.length).toBe(createdTasks.length);
+      for (const [index, task] of tasks.entries()) {
+        const createdTask = createdTasks[index];
+
+        expect(task.id).toBe(createdTasks[index].id);
+        expect(task.type).toBe(createdTask.type);
+        expect(task.enabled).toBe(createdTask.enabled);
+        expect(task.status).toBe(createdTask.status);
+        expect(task.createTime).toEqual(createdTask.createTime);
+        expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
+        expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.interval).toBe(createdTask.interval);
+        expect(task.runs).toBe(createdTask.runs);
+        expect(task.attempts).toBe(createdTask.attempts);
+        expect(task.deliveries).toBe(createdTask.deliveries);
+
+        expect(task.payload).toBeUndefined();
+      }
+    });
+  });
+
+  describe('#listSummaryPaged', () => {
+    const type = 'listSummaryPaged-task';
+    const createdTasks: Task<any>[] = [];
+
+    beforeAll(async () => {
+      const startTime = Date.now();
+
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 3, group: 'a', arr: ['first', 'second'] },
+          {
+            scheduledTime: moment(startTime)
+              .add(15, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 2, group: 'b', arr: ['first', 'second'] },
+          {
+            scheduledTime: moment(startTime)
+              .subtract(1, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 1, group: 'a', arr: ['first', 'second'] },
+          {
+            scheduledTime: moment(startTime)
+              .add(20, 'minutes')
+              .toDate()
+          }
+        )
+      );
+      createdTasks.push(
+        await client.create(
+          type,
+          { reverseIndex: 0, group: 'b', arr: ['first', 'second'] },
+          {
+            scheduledTime: moment(startTime)
+              .add(12, 'minutes')
+              .toDate()
+          }
+        )
+      );
+    });
+
+    afterAll(async () => {
+      await client.delete(type);
+    });
+
+    it('returns tasks in no particular order by default', async () => {
+      const tasks = await client.listSummaryPaged<any>(type);
+
+      expect(tasks.length).toBe(createdTasks.length);
+      expect(tasks.continuation).toBeUndefined();
+    });
+
+    it('allows the sort expression to be overridden', async () => {
+      const tasks = await client.listSummaryPaged<any>(type, {
+        sortExpression: t.createTime,
+        pageSize: 3
+      });
+
+      expect(tasks.length).toBe(3);
+      expect(tasks.continuation).toEqual(expect.any(String));
+
+      const moreTasks = await client.listSummaryPaged<any>(type, {
+        sortExpression: t.createTime,
+        pageSize: 3,
+        continuation: tasks.continuation
+      });
+
+      expect(moreTasks.length).toBe(1);
+      expect(moreTasks.continuation).toBeUndefined();
+
+      tasks.push(...moreTasks);
+
+      for (const [index, task] of tasks.entries()) {
+        const createdTask = createdTasks[index];
+
+        expect(task.id).toBe(createdTasks[index].id);
+        expect(task.type).toBe(createdTask.type);
+        expect(task.enabled).toBe(createdTask.enabled);
+        expect(task.status).toBe(createdTask.status);
+        expect(task.createTime).toEqual(createdTask.createTime);
+        expect(task.nextRunTime).toEqual(createdTask.nextRunTime);
+        expect(task.lastUpdatedTime).toEqual(createdTask.lastUpdatedTime);
+        expect(task.lastRun).toEqual(createdTask.lastRun);
+        expect(task.interval).toBe(createdTask.interval);
+        expect(task.runs).toBe(createdTask.runs);
+        expect(task.attempts).toBe(createdTask.attempts);
+        expect(task.deliveries).toBe(createdTask.deliveries);
+
+        expect(task.payload).toBeUndefined();
+      }
+    });
+
+    it('allows filtering by any data in the task', async () => {
+      const tasks = await client.listSummaryPaged<any>(type, {
+        sortExpression: t.createTime,
+        filter: q.equal(t.payload('group'), 'a'),
+        pageSize: 1
+      });
+
+      expect(tasks.length).toBe(1);
+      expect(tasks.continuation).toEqual(expect.any(String));
+
+      const moreTasks = await client.listSummaryPaged<any>(type, {
+        sortExpression: t.createTime,
+        filter: q.equal(t.payload('group'), 'a'),
+        pageSize: 1,
+        continuation: tasks.continuation
+      });
+
+      expect(moreTasks.length).toBe(1);
+      expect(moreTasks.continuation).toBeUndefined();
+
+      tasks.push(...moreTasks);
+
+      expect(tasks[0].id).toBe(createdTasks[0].id);
+      expect(tasks[1].id).toBe(createdTasks[2].id);
+    });
+
+    it('can return selected data from the payload', async () => {
+      const tasks = await client.listSummaryPaged<any>(type, {
+        sortExpression: t.createTime,
+        project: [t.payload('group'), t.payload('arr', 1)]
+      });
+
+      expect(tasks.length).toBe(createdTasks.length);
+      expect(tasks.continuation).toBeUndefined();
+
+      expect(tasks[0].id).toBe(createdTasks[0].id);
+      expect(tasks[0].payload).toEqual({ group: 'a', arr: ['second'] });
+
+      expect(tasks[1].id).toBe(createdTasks[1].id);
+      expect(tasks[1].payload).toEqual({ group: 'b', arr: ['second'] });
+
+      expect(tasks[2].id).toBe(createdTasks[2].id);
+      expect(tasks[2].payload).toEqual({ group: 'a', arr: ['second'] });
+
+      expect(tasks[3].id).toBe(createdTasks[3].id);
+      expect(tasks[3].payload).toEqual({ group: 'b', arr: ['second'] });
+    });
+
+    it('does not allow projecting data outside of the payload', async () => {
+      try {
+        await client.listSummaryPaged<any>(type, {
+          sortExpression: t.createTime,
+          project: [[t.payload()[0], 'invalid', []]]
+        });
+        throw new Error('should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(TypeError);
+      }
+    });
+
+    it('works with a scoped client', async () => {
+      const tasks = await client.type(type).listSummaryPaged<any>({
+        sortExpression: t.createTime,
+        pageSize: 2
+      });
+
+      expect(tasks.length).toBe(2);
+      expect(tasks.continuation).toEqual(expect.any(String));
+
+      const moreTasks = await client.type(type).listSummaryPaged<any>({
+        sortExpression: t.createTime,
+        pageSize: 2,
+        continuation: tasks.continuation
+      });
+
+      expect(moreTasks.length).toBe(2);
+      expect(moreTasks.continuation).toBeUndefined();
+
+      tasks.push(...moreTasks);
+
       for (const [index, task] of tasks.entries()) {
         const createdTask = createdTasks[index];
 

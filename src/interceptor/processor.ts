@@ -145,5 +145,6 @@ export default class InterceptorProcessor {
 
 export interface AnnotatedResponse<T> {
   ruConsumption?: number;
+  continuation?: string;
   result: T;
 }

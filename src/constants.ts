@@ -52,6 +52,8 @@ export const NO_RETRY: Required<TimeoutsOptions> = {
 export const REFRESH_INTERVAL = 5000;
 export const LOCK_RATIO = 2 / 3;
 export const DEFAULT_DATABASE_THROUGHPUT = 1000;
+export const DEFAULT_PAGE_SIZE = 25;
 
 export const RU_HEADER = 'x-ms-request-charge';
 export const SESSION_TOKEN_HEADER = 'x-ms-session-token';
+export const CONTINUATION_HEADER = 'x-ms-continuation';

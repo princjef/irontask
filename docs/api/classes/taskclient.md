@@ -41,7 +41,9 @@ class TaskClient
 |  [listAll(options)](./taskclient.md#listAll-method) | Retrieves all tasks across all types of tasks, paged using the provided list options. |
 |  [listAllSummary(options)](./taskclient.md#listAllSummary-method) | Retrieves all tasks across all types with the entire payload omitted by default. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
 |  [listen(type, handler, options)](./taskclient.md#listen-method) | Start listening for tasks of the provided type. |
+|  [listPaged(type, options)](./taskclient.md#listPaged-method) | Retrieves a single page from the database for tasks of the given type, optionally starting from the provided continuation token. |
 |  [listSummary(type, options)](./taskclient.md#listSummary-method) | Retrieves all tasks of the given type with the entire payload omitted by default. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
+|  [listSummaryPaged(type, options)](./taskclient.md#listSummaryPaged-method) | Retrieves a single page of tasks of the given type with the entire payload omitted by default, optionally starting from the provided continuation token. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
 |  [registerSprocs()](./taskclient.md#registerSprocs-method) | Ensures that the proper stored procedures are registered with Cosmos DB for the client to function. You should never have to call this directly. |
 |  [type(type)](./taskclient.md#type-method) | Returns a client with all operations automatically scoped to the provided task type. This is useful if you have an area where you need to perform many related operations for a single task type and don't want to have to specify it each time. |
 
@@ -536,6 +538,29 @@ listen<T>(type: string, handler: TaskHandler<T>, options?: ListenOptions): Liste
 
 `Listener<T>`
 
+<a id="listPaged-method"></a>
+
+### listPaged(type, options)
+
+Retrieves a single page from the database for tasks of the given type, optionally starting from the provided continuation token.
+
+<b>Signature:</b>
+
+```typescript
+listPaged<T>(type: string, options?: ListPageOptions): Promise<ArrayWithContinuation<Task<T>>>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  type | `string` | Task type |
+|  options | [ListPageOptions](../interfaces/listpageoptions.md) | Options controlling which tasks to retrieve |
+
+<b>Returns:</b>
+
+`Promise<ArrayWithContinuation<Task<T>>>`
+
 <a id="listSummary-method"></a>
 
 ### listSummary(type, options)
@@ -560,6 +585,31 @@ listSummary<T>(type: string, options?: ListSummaryOptions): Promise<ReadonlyTask
 <b>Returns:</b>
 
 `Promise<ReadonlyTask<T>[]>`
+
+<a id="listSummaryPaged-method"></a>
+
+### listSummaryPaged(type, options)
+
+Retrieves a single page of tasks of the given type with the entire payload omitted by default, optionally starting from the provided continuation token. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory.
+
+Results are paged, filtered and sorted using the provided options. You may also specify certain properties of the payload you want to see in the returned task through the options.
+
+<b>Signature:</b>
+
+```typescript
+listSummaryPaged<T>(type: string, options?: ListSummaryPageOptions): Promise<ArrayWithContinuation<ReadonlyTask<T>>>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  type | `string` | Task type |
+|  options | [ListSummaryPageOptions](../interfaces/listsummarypageoptions.md) | Options controlling which tasks to retrieve |
+
+<b>Returns:</b>
+
+`Promise<ArrayWithContinuation<ReadonlyTask<T>>>`
 
 <a id="registerSprocs-method"></a>
 

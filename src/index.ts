@@ -11,18 +11,21 @@ export default TaskClient;
 export { IronTaskError, Interceptors };
 
 export {
-  TaskClientOptions,
+  ArrayWithContinuation,
   CreateTaskOptions,
   IterateOptions,
   IterateSummaryOptions,
   ListOptions,
+  ListPageOptions,
   ListSummaryOptions,
+  ListSummaryPageOptions,
   ListenOptions,
+  Listener,
   ProjectOptions,
   ScopedTaskClient as ScopedClient,
-  TaskHandler,
-  Listener,
-  TaskClient
+  TaskClient,
+  TaskClientOptions,
+  TaskHandler
 } from './client';
 export { NO_RETRY } from './constants';
 export { q, QueryType, FnSymbol, OpSymbol, PropSymbol } from './query';

@@ -9,12 +9,15 @@ import { ReadonlyTask, Task } from '../task';
 import TaskClient from './client';
 import { Listener } from './listener';
 import {
+  ArrayWithContinuation,
   CreateTaskOptions,
   IterateOptions,
   IterateSummaryOptions,
   ListenOptions,
   ListOptions,
+  ListPageOptions,
   ListSummaryOptions,
+  ListSummaryPageOptions,
   TaskHandler
 } from './types';
 
@@ -73,6 +76,20 @@ export default class ScopedTaskClient {
   }
 
   /**
+   * Retrieves a single page from the database for tasks of the given type,
+   * optionally starting from the provided continuation token.
+   *
+   * @param options - Options controlling which tasks to retrieve
+   *
+   * @public
+   */
+  async listPaged<T>(
+    options: ListPageOptions = {}
+  ): Promise<ArrayWithContinuation<Task<T>>> {
+    return this._client.listPaged(this._type, options);
+  }
+
+  /**
    * Retrieves a all tasks of the given type with the entire payload omitted
    * by default. This is primarily useful if you have tasks with a large
    * amount of data in the payload that you don't need to see in the listed
@@ -92,6 +109,30 @@ export default class ScopedTaskClient {
     options: ListSummaryOptions = {}
   ): Promise<ReadonlyTask<T>[]> {
     return this._client.listSummary(this._type, options);
+  }
+
+  /**
+   * Retrieves a single page of tasks of the given type with the entire payload
+   * omitted by default, optionally starting from the provided continuation
+   * token. This is primarily useful if you have tasks with a large amount of
+   * data in the payload that you don't need to see in the listed results and
+   * you want to save cost/memory.
+   *
+   * @remarks
+   *
+   * Results are paged, filtered and sorted using the provided options. You
+   * may also specify certain properties of the payload you want to see in the
+   * returned task through the options.
+   *
+   * @param type    - Task type
+   * @param options - Options controlling which tasks to retrieve
+   *
+   * @public
+   */
+  async listSummaryPaged<T>(
+    options: ListSummaryPageOptions = {}
+  ): Promise<ArrayWithContinuation<ReadonlyTask<T>>> {
+    return this._client.listSummaryPaged(this._type, options);
   }
 
   /**

@@ -15,6 +15,7 @@ interface ProjectOptions
 - <b>ProjectOptions</b>
     - [IterateSummaryOptions](./iteratesummaryoptions.md)
     - [ListSummaryOptions](./listsummaryoptions.md)
+    - [ListSummaryPageOptions](./listsummarypageoptions.md)
 
 ## Properties
 
