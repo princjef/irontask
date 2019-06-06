@@ -271,11 +271,59 @@ export interface ListOptions extends IterateOptions {
 }
 
 /**
+ * Options controlling listing tasks with continuation tokens.
+ *
+ * @public
+ */
+export interface ListPageOptions extends IterateOptions {
+  /**
+   * Continuation token indicating where to start from.
+   *
+   * @public
+   */
+  continuation?: string;
+
+  /**
+   * Number of tasks to return from the result set.
+   *
+   * @defaultValue 25
+   *
+   * @public
+   */
+  pageSize?: number;
+}
+
+/**
  * Options controlling listing task summaries.
  *
  * @public
  */
 export interface ListSummaryOptions extends ListOptions, ProjectOptions {}
+
+/**
+ * Options controlling listing task summaries with continuation tokens.
+ *
+ * @public
+ */
+export interface ListSummaryPageOptions
+  extends ListPageOptions,
+    ProjectOptions {}
+
+/**
+ * Array of results including a continuation token property.
+ *
+ * @public
+ */
+export interface ArrayWithContinuation<T> extends Array<T> {
+  /**
+   * If present, a continuation token that can be provided in the {@link
+   * ListPageOptions.continuation} option to retrieve more results. If not
+   * present, there are no more results.
+   *
+   * @public
+   */
+  continuation?: string;
+}
 
 /**
  * Options configuring the behavior of a listener.

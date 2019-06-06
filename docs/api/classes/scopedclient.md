@@ -27,7 +27,9 @@ class ScopedTaskClient
 |  [iterateSummary(options)](./scopedclient.md#iterateSummary-method) | Returns an async iterator for iterating over all tasks of the given type with the entire payload omitted by default. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
 |  [list(options)](./scopedclient.md#list-method) | Retrieves all tasks of the given type, paged using the provided list options. |
 |  [listen(handler, options)](./scopedclient.md#listen-method) | Start listening for tasks of the scoped type. |
+|  [listPaged(options)](./scopedclient.md#listPaged-method) | Retrieves a single page from the database for tasks of the given type, optionally starting from the provided continuation token. |
 |  [listSummary(options)](./scopedclient.md#listSummary-method) | Retrieves a all tasks of the given type with the entire payload omitted by default. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
+|  [listSummaryPaged(options)](./scopedclient.md#listSummaryPaged-method) | Retrieves a single page of tasks of the given type with the entire payload omitted by default, optionally starting from the provided continuation token. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory. |
 
 ## Method Details
 
@@ -281,6 +283,28 @@ listen<T>(handler: TaskHandler<T>, options?: ListenOptions): Listener<T>;
 
 `Listener<T>`
 
+<a id="listPaged-method"></a>
+
+### listPaged(options)
+
+Retrieves a single page from the database for tasks of the given type, optionally starting from the provided continuation token.
+
+<b>Signature:</b>
+
+```typescript
+listPaged<T>(options?: ListPageOptions): Promise<ArrayWithContinuation<Task<T>>>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  options | [ListPageOptions](../interfaces/listpageoptions.md) | Options controlling which tasks to retrieve |
+
+<b>Returns:</b>
+
+`Promise<ArrayWithContinuation<Task<T>>>`
+
 <a id="listSummary-method"></a>
 
 ### listSummary(options)
@@ -304,4 +328,28 @@ listSummary<T>(options?: ListSummaryOptions): Promise<ReadonlyTask<T>[]>;
 <b>Returns:</b>
 
 `Promise<ReadonlyTask<T>[]>`
+
+<a id="listSummaryPaged-method"></a>
+
+### listSummaryPaged(options)
+
+Retrieves a single page of tasks of the given type with the entire payload omitted by default, optionally starting from the provided continuation token. This is primarily useful if you have tasks with a large amount of data in the payload that you don't need to see in the listed results and you want to save cost/memory.
+
+Results are paged, filtered and sorted using the provided options. You may also specify certain properties of the payload you want to see in the returned task through the options.
+
+<b>Signature:</b>
+
+```typescript
+listSummaryPaged<T>(options?: ListSummaryPageOptions): Promise<ArrayWithContinuation<ReadonlyTask<T>>>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  options | [ListSummaryPageOptions](../interfaces/listsummarypageoptions.md) | Options controlling which tasks to retrieve |
+
+<b>Returns:</b>
+
+`Promise<ArrayWithContinuation<ReadonlyTask<T>>>`
 

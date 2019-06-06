@@ -16,6 +16,8 @@ interface IterateOptions
     - [IterateSummaryOptions](./iteratesummaryoptions.md)
     - [ListOptions](./listoptions.md)
         - [ListSummaryOptions](./listsummaryoptions.md)
+    - [ListPageOptions](./listpageoptions.md)
+        - [ListSummaryPageOptions](./listsummarypageoptions.md)
 
 ## Properties
 

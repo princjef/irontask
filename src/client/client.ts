@@ -7,6 +7,7 @@ import { SqlQuerySpec } from '@azure/cosmos';
 import uuid from 'uuid/v4';
 
 import {
+  DEFAULT_PAGE_SIZE,
   DEFAULT_RETRY_OPTIONS,
   INTERNAL_RETRY_OPTIONS,
   REFRESH_INTERVAL
@@ -36,12 +37,15 @@ import CosmosDbClient from './cosmos';
 import ListenerImpl, { Listener } from './listener';
 import ScopedTaskClient from './scoped';
 import {
+  ArrayWithContinuation,
   CreateTaskOptions,
   IterateOptions,
   IterateSummaryOptions,
   ListenOptions,
   ListOptions,
+  ListPageOptions,
   ListSummaryOptions,
+  ListSummaryPageOptions,
   TaskClientOptions,
   TaskHandler
 } from './types';
@@ -252,7 +256,7 @@ export default class TaskClient {
    */
   async list<T>(type: string, options: ListOptions = {}): Promise<Task<T>[]> {
     const skip = options.skip || 0;
-    const top = options.top || 25;
+    const top = options.top || DEFAULT_PAGE_SIZE;
 
     // TODO: no skip support yet in Cosmos DB so we have to do the skip
     // client side for now.
@@ -283,6 +287,50 @@ export default class TaskClient {
   }
 
   /**
+   * Retrieves a single page from the database for tasks of the given type,
+   * optionally starting from the provided continuation token.
+   *
+   * @param type    - Task type
+   * @param options - Options controlling which tasks to retrieve
+   *
+   * @public
+   */
+  async listPaged<T>(
+    type: string,
+    options: ListPageOptions = {}
+  ): Promise<ArrayWithContinuation<Task<T>>> {
+    const query = buildQuery({
+      filter: typeFilter(type, options.filter),
+      sort: options.sortExpression,
+      sortOrder: options.sortOrder
+    });
+
+    return this._interceptor.client(
+      this,
+      Interceptors.TaskClientOperation.ListPaged,
+      this._client.containerRef,
+      type,
+      async () => {
+        const response = await this._client.queryItemsPage<
+          ResolvedTaskDocument<T>
+        >(query, {
+          continuation: options.continuation,
+          pageSize: options.pageSize || DEFAULT_PAGE_SIZE
+        });
+        return {
+          ...response,
+          result: this._addContinuation(
+            response.result.map(doc =>
+              TaskImpl.create(this._client, this._interceptor, doc)
+            ),
+            response.continuation!
+          )
+        };
+      }
+    );
+  }
+
+  /**
    * Retrieves all tasks across all types of tasks, paged using the provided
    * list options.
    *
@@ -298,7 +346,7 @@ export default class TaskClient {
    */
   async listAll<T>(options: ListOptions = {}): Promise<Task<T>[]> {
     const skip = options.skip || 0;
-    const top = options.top || 25;
+    const top = options.top || DEFAULT_PAGE_SIZE;
 
     // TODO: no skip support yet in Cosmos DB so we have to do the skip
     // client side for now.
@@ -350,7 +398,7 @@ export default class TaskClient {
     options: ListSummaryOptions = {}
   ): Promise<ReadonlyTask<T>[]> {
     const skip = options.skip || 0;
-    const top = options.top || 25;
+    const top = options.top || DEFAULT_PAGE_SIZE;
 
     // TODO: no skip support yet in Cosmos DB so we have to do the skip
     // client side for now.
@@ -384,6 +432,60 @@ export default class TaskClient {
   }
 
   /**
+   * Retrieves a single page of tasks of the given type with the entire payload
+   * omitted by default, optionally starting from the provided continuation
+   * token. This is primarily useful if you have tasks with a large amount of
+   * data in the payload that you don't need to see in the listed results and
+   * you want to save cost/memory.
+   *
+   * @remarks
+   *
+   * Results are paged, filtered and sorted using the provided options. You
+   * may also specify certain properties of the payload you want to see in the
+   * returned task through the options.
+   *
+   * @param type    - Task type
+   * @param options - Options controlling which tasks to retrieve
+   *
+   * @public
+   */
+  async listSummaryPaged<T>(
+    type: string,
+    options: ListSummaryPageOptions = {}
+  ): Promise<ArrayWithContinuation<ReadonlyTask<T>>> {
+    const query = buildQuery({
+      projection: summaryProjection(options.project),
+      filter: typeFilter(type, options.filter),
+      sort: options.sortExpression,
+      sortOrder: options.sortOrder
+    });
+
+    return this._interceptor.client(
+      this,
+      Interceptors.TaskClientOperation.ListSummaryPaged,
+      this._client.containerRef,
+      type,
+      async () => {
+        const response = await this._client.queryItemsPage<
+          ResolvedTaskDocument<T>
+        >(query, {
+          continuation: options.continuation,
+          pageSize: options.pageSize || DEFAULT_PAGE_SIZE
+        });
+        return {
+          ...response,
+          result: this._addContinuation(
+            response.result.map(doc =>
+              ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
+            ),
+            response.continuation
+          )
+        };
+      }
+    );
+  }
+
+  /**
    * Retrieves all tasks across all types with the entire payload omitted by
    * default. This is primarily useful if you have tasks with a large amount
    * of data in the payload that you don't need to see in the listed results
@@ -407,7 +509,7 @@ export default class TaskClient {
     options: ListSummaryOptions = {}
   ): Promise<ReadonlyTask<T>[]> {
     const skip = options.skip || 0;
-    const top = options.top || 25;
+    const top = options.top || DEFAULT_PAGE_SIZE;
 
     // TODO: no skip support yet in Cosmos DB so we have to do the skip
     // client side for now.
@@ -1039,6 +1141,15 @@ export default class TaskClient {
         }
       })
     };
+  }
+
+  private _addContinuation<T>(
+    list: T[],
+    continuation: string | undefined
+  ): ArrayWithContinuation<T> {
+    const result: ArrayWithContinuation<T> = list as any;
+    result.continuation = continuation;
+    return result;
   }
 }
 
