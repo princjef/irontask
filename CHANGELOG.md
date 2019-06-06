@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/princjef/irontask/compare/v1.0.3...v1.1.0) (2019-06-06)
+
+
+### Features
+
+* **client:** support continuation token paging ([#20](https://github.com/princjef/irontask/issues/20)) ([9b8c784](https://github.com/princjef/irontask/commit/9b8c784))
+* **task:** add support for lastUpdatedTime ([#18](https://github.com/princjef/irontask/issues/18)) ([dcd58e1](https://github.com/princjef/irontask/commit/dcd58e1))
+
 ## [1.0.3](https://github.com/princjef/irontask/compare/v1.0.2...v1.0.3) (2019-05-02)
 
 
