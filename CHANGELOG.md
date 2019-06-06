@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/princjef/irontask/compare/v1.1.0...v1.1.1) (2019-06-06)
+
+
+### Bug Fixes
+
+* **types:** support Typescript < 3.4 again ([#21](https://github.com/princjef/irontask/issues/21)) ([5e48b5b](https://github.com/princjef/irontask/commit/5e48b5b))
+
 # [1.1.0](https://github.com/princjef/irontask/compare/v1.0.3...v1.1.0) (2019-06-06)
 
 
