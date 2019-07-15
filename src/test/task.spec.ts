@@ -18,12 +18,14 @@ import initialize from './harness';
 
 describe('Task', () => {
   let client: TaskClient;
+  let containerRef: string;
   let getClient: (options?: TaskClientOptions) => TaskClient;
   let cleanup: () => Promise<void>;
 
   beforeAll(async () => {
     const harness = await initialize();
     client = harness.client;
+    containerRef = harness.containerRef;
     getClient = harness.getClient;
     cleanup = harness.cleanup;
 
@@ -386,6 +388,7 @@ describe('Task', () => {
         expect(ctx.task.id).toBe(task.id);
         expect(ctx.task.type).toBe(type);
         expect(ctx.ruConsumption).toBeUndefined();
+        expect(ctx.ref).toBe(`${containerRef}/docs/${task.id}`);
         await next();
         expect(ctx.ruConsumption).toBeGreaterThan(0);
       }) as Interceptors.TaskRequestInterceptor);

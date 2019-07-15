@@ -20,12 +20,14 @@ import initialize from './harness';
 
 describe('Client', () => {
   let client: TaskClient;
+  let containerRef: string;
   let getClient: (options: TaskClientOptions) => TaskClient;
   let cleanup: () => Promise<void>;
 
   beforeAll(async () => {
     const harness = await initialize();
     client = harness.client;
+    containerRef = harness.containerRef;
     getClient = harness.getClient;
     cleanup = harness.cleanup;
 
@@ -2995,6 +2997,9 @@ describe('Client', () => {
         expect(ctx.ruConsumption).toBeUndefined();
         await next();
         expect(ctx.ruConsumption).toBeGreaterThan(0);
+        expect(ctx.ref).toEqual(
+          expect.stringContaining(`${containerRef}/docs/`)
+        );
       }) as Interceptors.ClientRequestInterceptor);
 
       const localClient = getClient({
