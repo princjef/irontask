@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/princjef/irontask/compare/v1.1.1...v1.1.2) (2019-07-15)
+
+
+### Bug Fixes
+
+* **interceptors:** use full URL for ref ([#22](https://github.com/princjef/irontask/issues/22)) ([9bcceb5](https://github.com/princjef/irontask/commit/9bcceb5))
+
 ## [1.1.1](https://github.com/princjef/irontask/compare/v1.1.0...v1.1.1) (2019-06-06)
 
 
