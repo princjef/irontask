@@ -3,6 +3,8 @@
  * Licensed under the MIT License.
  */
 
+import * as url from 'url';
+
 import { CosmosClient } from '@azure/cosmos';
 import uuid from 'uuid/v4';
 
@@ -49,6 +51,7 @@ export default async function initialize(options?: TaskClientOptions) {
     // production code.
     getClient: (options?: TaskClientOptions) =>
       new (TaskClient as any)((client as any)._client, options),
+    containerRef: url.resolve(account, `/dbs/${database}/colls/${collection}`),
     cleanup: async () => {
       const client = new CosmosClient({ endpoint: account, key });
       await client

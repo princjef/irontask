@@ -3,6 +3,8 @@
  * Licensed under the MIT License.
  */
 
+import * as url from 'url';
+
 import {
   Container,
   ContainerDefinition,
@@ -32,6 +34,7 @@ const ERROR_RU = Symbol('CosmosDB Error RU');
 const retryableNetworkingErrors = ['ECONNREFUSED', 'EAI_AGAIN'];
 
 export default class CosmosDbClient {
+  private _endpoint: string;
   private _client: Container;
   private _session?: string;
   private _retryOptions: TimeoutsOptions;
@@ -59,7 +62,7 @@ export default class CosmosDbClient {
         ...collectionOptions
       });
 
-      return new CosmosDbClient(container, retryOptions);
+      return new CosmosDbClient(account, container, retryOptions);
     } catch (err) {
       throw CosmosDbClient._translateError(err);
     }
@@ -74,16 +77,21 @@ export default class CosmosDbClient {
   }
 
   get containerRef(): string {
-    return this._client.url;
+    return url.resolve(this._endpoint, this._client.url);
   }
 
-  constructor(container: Container, retryOptions: TimeoutsOptions) {
+  constructor(
+    endpoint: string,
+    container: Container,
+    retryOptions: TimeoutsOptions
+  ) {
+    this._endpoint = endpoint;
     this._client = container;
     this._retryOptions = retryOptions;
   }
 
   documentRef(partition: string, id: string): string {
-    return this._client.item(id, partition).url;
+    return url.resolve(this._endpoint, this._client.item(id, partition).url);
   }
 
   async createItem<T>(document: T): Promise<AnnotatedResponse<T & Resource>> {

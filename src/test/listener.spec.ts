@@ -23,6 +23,7 @@ import initialize from './harness';
 
 describe('Listener', () => {
   let client: TaskClient;
+  let containerRef: string;
   let getClient: (options?: TaskClientOptions) => TaskClient;
   let cleanup: () => Promise<void>;
 
@@ -33,6 +34,7 @@ describe('Listener', () => {
       pollIntervalMs: 250
     });
     client = harness.client;
+    containerRef = harness.containerRef;
     getClient = harness.getClient;
     cleanup = harness.cleanup;
 
@@ -933,6 +935,7 @@ describe('Listener', () => {
       const processingInterceptor = jest.fn((async (ctx, next) => {
         expect(ctx.task.id).toBe(createdTask.id);
         expect(ctx.task.type).toBe(type);
+        expect(ctx.ref).toBe(`${containerRef}/docs/${createdTask.id}`);
         const result = await next();
         expect(result).toBe(ProcessingResult.Complete);
       }) as Interceptors.ProcessingInterceptor);
