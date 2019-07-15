@@ -25,7 +25,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "commit": "commit",
     "clean": "rimraf dist",
     "format": "prettier --write --loglevel warn \"src/**/*.ts\" \"*.md\"",
     "format:verify": "prettier --check --loglevel warn \"src/**/*.ts\" \"*.md\"",
@@ -57,9 +56,8 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.0.0",
+    "@commitlint/cli": "^8.1.0",
     "@commitlint/config-conventional": "^8.0.0",
-    "@commitlint/prompt-cli": "^8.0.0",
     "@microsoft/api-extractor": "^7.1.7",
     "@princjef/api-documenter": "^1.0.2",
     "@princjef/tslint-config": "^2.0.0",
