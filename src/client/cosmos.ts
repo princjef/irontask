@@ -6,12 +6,14 @@
 import * as url from 'url';
 
 import {
+  ConnectionPolicy,
   Container,
   ContainerDefinition,
   CosmosClient,
   IHeaders,
   ItemResponse,
   Resource,
+  RetryOptions,
   SqlQuerySpec
 } from '@azure/cosmos';
 import { Response } from '@azure/cosmos/lib/src/request';
@@ -48,7 +50,14 @@ export default class CosmosDbClient {
     retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
   ) {
     try {
-      const client = new CosmosClient({ endpoint: account, key });
+      // TODO: look into reducing request timeout
+      const connectionPolicy = new ConnectionPolicy();
+      connectionPolicy.RetryOptions = new RetryOptions(0);
+      const client = new CosmosClient({
+        endpoint: account,
+        key,
+        connectionPolicy
+      });
       const { database: db } = await client.databases.createIfNotExists(
         {
           id: database
