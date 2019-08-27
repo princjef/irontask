@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/princjef/irontask/compare/v1.1.2...v1.1.3) (2019-08-27)
+
+
+### Bug Fixes
+
+* **cosmos:** disable internal cosmos retries ([#24](https://github.com/princjef/irontask/issues/24)) ([7ebbcbe](https://github.com/princjef/irontask/commit/7ebbcbe))
+
 ## [1.1.2](https://github.com/princjef/irontask/compare/v1.1.1...v1.1.2) (2019-07-15)
 
 
