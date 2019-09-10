@@ -327,8 +327,11 @@ export default class CosmosDbClient {
   }
 
   private static _translateError(err: any, ruConsumption?: number) {
+    // We scrub the error first for sensitive information
+    const scrubbedError = CosmosDbClient._scrubError(err);
+
     let code: ErrorCode | undefined;
-    switch (err && err.code) {
+    switch (scrubbedError && scrubbedError.code) {
       case 400:
         code = ErrorCode.DATABASE_INVALID_REQUEST;
         break;
@@ -371,10 +374,22 @@ export default class CosmosDbClient {
     }
 
     if (code) {
-      const error = new IronTaskError(code, err);
+      const error = new IronTaskError(code, scrubbedError);
       error[ERROR_RU] = ruConsumption;
       return error;
     }
+
+    return scrubbedError;
+  }
+
+  private static _scrubError(err: any): any {
+    // Sometimes authorization headers can be exposed via cosmos SDK errors. We
+    // scrub this out to avoid it propagating downstream to users and getting
+    // logged into external systems.
+    if (err && err.requestHeaders && err.requestHeaders.authorization) {
+      delete err.requestHeaders.authorization;
+    }
+
     return err;
   }
 
