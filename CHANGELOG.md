@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/princjef/irontask/compare/v1.1.3...v1.1.4) (2019-09-10)
+
+
+### Bug Fixes
+
+* **cosmos:** remove authorization header if present in errors ([#25](https://github.com/princjef/irontask/issues/25)) ([e2baa33](https://github.com/princjef/irontask/commit/e2baa33))
+
 ## [1.1.3](https://github.com/princjef/irontask/compare/v1.1.2...v1.1.3) (2019-08-27)
 
 
