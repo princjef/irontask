@@ -28,8 +28,8 @@ jobs:
         displayName: Run Azure Cosmos DB Emulator
       - task: NodeTool@0
         inputs:
-          versionSpec: 8.x
-        displayName: Use Node.js 8.x
+          versionSpec: 8.16.2
+        displayName: Use Node.js 8.16.2
       - script: npm ci
         displayName: Install Dependencies
       - script: npm test
