@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 import * as util from 'util';
 
 import { createTimeout } from 'retry';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import { CosmosDbClient, ListenOptions } from '../client';
 import { LOCK_RATIO } from '../constants';

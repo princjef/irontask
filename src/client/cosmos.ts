@@ -10,13 +10,13 @@ import {
   Container,
   ContainerDefinition,
   CosmosClient,
-  IHeaders,
-  ItemResponse,
+  CosmosHeaders,
+  FeedResponse,
   Resource,
-  RetryOptions,
+  ResourceResponse,
+  Response,
   SqlQuerySpec
 } from '@azure/cosmos';
-import { Response } from '@azure/cosmos/lib/src/request';
 
 import {
   CONTINUATION_HEADER,
@@ -51,12 +51,18 @@ export default class CosmosDbClient {
   ) {
     try {
       // TODO: look into reducing request timeout
-      const connectionPolicy = new ConnectionPolicy();
-      connectionPolicy.RetryOptions = new RetryOptions(0);
+      const connectionPolicy: ConnectionPolicy = {
+        retryOptions: {
+          maxRetryAttemptCount: 0,
+          fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
+          maxWaitTimeInSeconds: 1000 // Just to make types happy
+        }
+      };
       const client = new CosmosClient({
         endpoint: account,
         key,
-        connectionPolicy
+        connectionPolicy,
+        consistencyLevel: 'Session'
       });
       const { database: db } = await client.databases.createIfNotExists(
         {
@@ -131,16 +137,17 @@ export default class CosmosDbClient {
   }
 
   async queryItemsArray<T>(
-    query: SqlQuerySpec,
-    crossPartition?: boolean
+    query: SqlQuerySpec
   ): Promise<AnnotatedResponse<T[]>> {
-    return await this._wrap(async () =>
-      this._client.items
-        .query<T>(query, {
-          sessionToken: this._session,
-          enableCrossPartitionQuery: crossPartition
-        })
-        .toArray()
+    return await this._wrap(
+      async () =>
+        (this._client.items
+          .query<T>(query, {
+            sessionToken: this._session
+          })
+          .fetchAll() as unknown) as FeedResponse<T> & {
+          headers: CosmosHeaders;
+        }
     );
   }
 
@@ -148,37 +155,36 @@ export default class CosmosDbClient {
     query: SqlQuerySpec,
     options: {
       continuation?: string;
-      crossPartition?: boolean;
       pageSize?: number;
     }
   ) {
-    return await this._wrap(async () =>
-      this._client.items
-        .query<T>(query, {
-          sessionToken: this._session,
-          enableCrossPartitionQuery: options.crossPartition,
-          continuation: options.continuation,
-          maxItemCount: options.pageSize
-        })
-        .executeNext()
+    return await this._wrap(
+      async () =>
+        (this._client.items
+          .query<T>(query, {
+            sessionToken: this._session,
+            continuation: options.continuation,
+            maxItemCount: options.pageSize
+          })
+          .fetchNext() as unknown) as FeedResponse<T> & {
+          headers: CosmosHeaders;
+        }
     );
   }
 
   async *queryItemsIterator<T>(
-    query: SqlQuerySpec,
-    crossPartition?: boolean
+    query: SqlQuerySpec
   ): AsyncIterable<AnnotatedResponse<T>> {
     const iterator = this._client.items
       .query<T>(query, {
-        sessionToken: this._session,
-        enableCrossPartitionQuery: crossPartition
+        sessionToken: this._session
       })
       .getAsyncIterator()
       [Symbol.asyncIterator]();
 
-    const modifiedIterator: AsyncIterable<AnnotatedResponse<T>> = {
+    const modifiedIterator: AsyncIterable<AnnotatedResponse<T[]>> = {
       [Symbol.asyncIterator]: () => ({
-        next: async (): Promise<IteratorResult<AnnotatedResponse<T>>> => {
+        next: async (): Promise<IteratorResult<AnnotatedResponse<T[]>>> => {
           try {
             const initialResult = await iterator.next();
             if (!initialResult.value) {
@@ -188,8 +194,8 @@ export default class CosmosDbClient {
               return initialResult as any;
             }
             return {
-              value: this._transformResult(initialResult.value),
-              done: initialResult.done
+              value: this._transformResult<T>(initialResult.value),
+              done: initialResult.done || false
             };
           } catch (err) {
             throw this._transformError(err);
@@ -199,7 +205,14 @@ export default class CosmosDbClient {
     };
 
     for await (const result of modifiedIterator) {
-      yield result;
+      for (const [i, entry] of result.result.entries()) {
+        // Return the original result with the original RU consumption for the
+        // first entry, undefined for the rest.
+        yield {
+          ruConsumption: i === 0 ? result.ruConsumption : undefined,
+          result: entry
+        };
+      }
     }
   }
 
@@ -213,13 +226,13 @@ export default class CosmosDbClient {
           ...(await this._client
             .item(id, partition)
             .delete({ sessionToken: this._session })),
-          body: undefined
+          result: undefined
         };
       } catch (err) {
         if (CosmosDbClient._isCosmosError(err, 404)) {
           return {
             headers: err.headers,
-            body: undefined
+            result: undefined
           };
         }
         throw err;
@@ -247,7 +260,7 @@ export default class CosmosDbClient {
     body: (...args: any[]) => void
   ): Promise<AnnotatedResponse<any>> {
     return await this._wrap(async () =>
-      this._client.storedProcedures.create({ id, body })
+      this._client.scripts.storedProcedures.create({ id, body })
     );
   }
 
@@ -256,7 +269,7 @@ export default class CosmosDbClient {
     body: (...args: any[]) => void
   ): Promise<AnnotatedResponse<any>> {
     return await this._wrap(async () =>
-      this._client.storedProcedure(id).replace({ id, body })
+      this._client.scripts.storedProcedure(id).replace({ id, body })
     );
   }
 
@@ -266,15 +279,19 @@ export default class CosmosDbClient {
     ...params: string[]
   ): Promise<AnnotatedResponse<T>> {
     return await this._wrap(async () =>
-      this._client
-        .storedProcedure(id)
-        .execute<T>(params, { partitionKey: partition })
+      this._client.scripts.storedProcedure(id).execute<T>(partition, params)
     );
   }
 
   private async _wrap<T>(
+    operation: () => Promise<ListRes<T>>
+  ): Promise<AnnotatedResponse<T[]>>;
+  private async _wrap<T>(
+    operation: () => Promise<ItemRes<T>>
+  ): Promise<AnnotatedResponse<T>>;
+  private async _wrap<T>(
     operation: () => Promise<Res<T>>
-  ): Promise<AnnotatedResponse<T>> {
+  ): Promise<AnnotatedResponse<T> | AnnotatedResponse<T[]>> {
     return await retry(
       async () => {
         try {
@@ -288,17 +305,27 @@ export default class CosmosDbClient {
     );
   }
 
-  private _transformResult<T>(response: Res<T>): AnnotatedResponse<T> {
+  private _transformResult<T>(response: ListRes<T>): AnnotatedResponse<T[]>;
+  private _transformResult<T>(response: ItemRes<T>): AnnotatedResponse<T>;
+  private _transformResult<T>(
+    response: Res<T>
+  ): AnnotatedResponse<T> | AnnotatedResponse<T[]> {
     this._updateSession(response.headers);
+
+    let result: T | T[];
+    if ('resource' in response) {
+      result = (response as Pick<ResourceResponse<T>, 'resource'>).resource!;
+    } else if ('resources' in response) {
+      result = (response as Pick<FeedResponse<T>, 'resources'>).resources;
+    } else {
+      result = (response as Pick<Response<T>, 'result'>).result!;
+    }
 
     return {
       ruConsumption: CosmosDbClient._getRu(response.headers),
       continuation: CosmosDbClient._getContinuation(response.headers),
-      result:
-        'result' in response
-          ? response.result!
-          : (response as ItemResponse<T>).body!
-    };
+      result
+    } as AnnotatedResponse<T> | AnnotatedResponse<T[]>;
   }
 
   private _transformError(error: any): any {
@@ -314,7 +341,7 @@ export default class CosmosDbClient {
     );
   }
 
-  private _updateSession(headers: IHeaders | undefined) {
+  private _updateSession(headers: CosmosHeaders | undefined) {
     // Cosmos DB session tokens are maintained per collection and change
     // with each update to the database. Since the entire client is scoped
     // to a single collection, we simply pull the most recent session token
@@ -322,7 +349,7 @@ export default class CosmosDbClient {
     // support collections configured with session consistency while still
     // maintaining reasonable linearizability guarantees within scenarios.
     if (headers && headers[SESSION_TOKEN_HEADER]) {
-      this._session = headers[SESSION_TOKEN_HEADER];
+      this._session = headers[SESSION_TOKEN_HEADER] as string;
     }
   }
 
@@ -393,14 +420,16 @@ export default class CosmosDbClient {
     return err;
   }
 
-  private static _getRu(headers: IHeaders | undefined): number | undefined {
+  private static _getRu(
+    headers: CosmosHeaders | undefined
+  ): number | undefined {
     return headers && headers[RU_HEADER]
       ? Number(headers[RU_HEADER])
       : undefined;
   }
 
   private static _getContinuation(
-    headers: IHeaders | undefined
+    headers: CosmosHeaders | undefined
   ): string | undefined {
     return headers && headers[CONTINUATION_HEADER];
   }
@@ -427,6 +456,12 @@ export interface DocumentBase {
   _etag: string;
 }
 
-type Res<T> =
-  | Pick<ItemResponse<T>, 'headers' | 'body'>
+type ListRes<T> = Pick<FeedResponse<T>, 'resources'> & {
+  headers: CosmosHeaders;
+};
+
+type ItemRes<T> =
+  | Pick<ResourceResponse<T>, 'headers' | 'resource'>
   | Pick<Response<T>, 'headers' | 'result'>;
+
+type Res<T> = ListRes<T> | ItemRes<T>;

@@ -4,7 +4,7 @@
  */
 
 import moment = require('moment');
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import taskStatus, { isFinished } from './status';
 import { TaskStatus } from './types';

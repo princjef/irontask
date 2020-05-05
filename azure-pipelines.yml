@@ -13,8 +13,8 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: 10.x
-        displayName: Use Node.js 10
+          versionSpec: 12.x
+        displayName: Use Node.js 12
       - script: npm ci
         displayName: Install Dependencies
       - script: ./node_modules/.bin/commitlint-azure-pipelines
@@ -28,8 +28,8 @@ jobs:
         displayName: Run Azure Cosmos DB Emulator
       - task: NodeTool@0
         inputs:
-          versionSpec: 8.x
-        displayName: Use Node.js 8.x
+          versionSpec: 8.17.0
+        displayName: Use Node.js 8.17.0
       - script: npm ci
         displayName: Install Dependencies
       - script: npm test
@@ -63,8 +63,8 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: 10.x
-        displayName: Use Node.js 10
+          versionSpec: 12.x
+        displayName: Use Node.js 12
       - script: npm ci
         displayName: Install Dependencies
       - script: npm run release
