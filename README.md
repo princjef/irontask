@@ -17,8 +17,6 @@ Persistent, queryable task scheduling for Node.js using Azure Cosmos DB.
 - Configurable automatic cleanup of finished tasks (if desired)
 - Effortless logging of all operations through built-in instrumentation hooks
 
-See the **[API Documentation][]** for full information about all features.
-
 ## Getting Started
 
 ### Prerequisites
@@ -393,7 +391,6 @@ for await (const task of client.iterateAllSummary()) {
 
 See [CONTRIBUTING.md][contributing] for full contribution guidelines.
 
-[api documentation]: docs/api/index.md
 [azure cosmos db]: https://azure.microsoft.com/services/cosmos-db/
 [azure cosmos db emulator]:
   https://docs.microsoft.com/azure/cosmos-db/local-emulator
