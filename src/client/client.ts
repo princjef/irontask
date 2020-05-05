@@ -4,7 +4,7 @@
  */
 
 import { SqlQuerySpec } from '@azure/cosmos';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import {
   DEFAULT_PAGE_SIZE,
@@ -93,7 +93,6 @@ export default class TaskClient {
       key,
       {
         partitionKey: {
-          kind: 'Hash',
           paths: ['/config/type']
         },
         defaultTtl: -1
@@ -365,7 +364,7 @@ export default class TaskClient {
       async () => {
         const response = await this._client.queryItemsArray<
           ResolvedTaskDocument<T>
-        >(query, true);
+        >(query);
         return {
           ...response,
           result: response.result
@@ -529,7 +528,7 @@ export default class TaskClient {
       async () => {
         const response = await this._client.queryItemsArray<
           ResolvedTaskDocument<T>
-        >(query, true);
+        >(query);
         return {
           ...response,
           result: response.result
@@ -615,8 +614,7 @@ export default class TaskClient {
     });
 
     const iterator = this._client.queryItemsIterator<ResolvedTaskDocument<T>>(
-      query,
-      true
+      query
     );
 
     const mappedIterator = this._iterate(
@@ -719,8 +717,7 @@ export default class TaskClient {
     });
 
     const iterator = this._client.queryItemsIterator<ResolvedTaskDocument<T>>(
-      query,
-      true
+      query
     );
 
     const mappedIterator = this._iterate(
@@ -788,10 +785,7 @@ export default class TaskClient {
       this._client.containerRef,
       undefined,
       async () => {
-        const response = await this._client.queryItemsArray<number>(
-          query,
-          true
-        );
+        const response = await this._client.queryItemsArray<number>(query);
         return {
           ...response,
           result: response.result[0]
@@ -1071,7 +1065,7 @@ export default class TaskClient {
 
         const iterator = await this._client.queryItemsIterator<
           ResolvedTaskDocument<any>
-        >(query, type === undefined);
+        >(query);
 
         for await (const results of batchIterator(
           iterator,
@@ -1119,7 +1113,7 @@ export default class TaskClient {
             type,
             async () => {
               const result = await rawIterator.next();
-              done = result.done;
+              done = result.done || false;
               if (!result.value) {
                 return {
                   result: undefined,
