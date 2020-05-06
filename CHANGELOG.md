@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/princjef/irontask/compare/v1.1.4...v1.2.0) (2020-05-06)
+
+
+### Features
+
+* **query:** use new offset and limit params for paging ([#33](https://github.com/princjef/irontask/issues/33)) ([d286254](https://github.com/princjef/irontask/commit/d2862547c6c1710745fcd74f9762ef1894e836c9))
+
 ## [1.1.4](https://github.com/princjef/irontask/compare/v1.1.3...v1.1.4) (2019-09-10)
 
 
