@@ -6,15 +6,6 @@ implemented or improved in the future, please tell the Cosmos DB team that you
 would like the corresponding backing features implemented in the database by
 voting for them using the feedback links below.
 
-### Task Priority
-
-To support handling task priority (either high/low or numerical) efficiently, it
-is necessary to have support for ordering query results by multiple fields. To
-do so, we need support for it in the database. See the page below to vote for
-this feature:
-
-https://feedback.azure.com/forums/263030-azure-cosmos-db/suggestions/16883608-allow-multi-order-by
-
 ### Efficient Listing of Large Sets of Tasks
 
 When listing large sets of tasks, we paginate the results by default to reduce
@@ -25,6 +16,10 @@ efficient paging, we need to be able to skip the earlier pages in the database
 itself. See the page below to vote for this feature:
 
 https://feedback.azure.com/forums/263030-azure-cosmos-db/suggestions/6350987--documentdb-allow-paging-skip-take
+
+> NOTE: this feature has been implemented in Cosmos DB but still has suboptimal
+> performance at time of writing. See the linked feedback item for more
+> information.
 
 ### Efficient Updates
 

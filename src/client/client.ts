@@ -257,10 +257,9 @@ export default class TaskClient {
     const skip = options.skip || 0;
     const top = options.top || DEFAULT_PAGE_SIZE;
 
-    // TODO: no skip support yet in Cosmos DB so we have to do the skip
-    // client side for now.
     const query = buildQuery({
-      limit: skip + top,
+      offset: skip,
+      limit: top,
       filter: typeFilter(type, options.filter),
       sort: options.sortExpression,
       sortOrder: options.sortOrder
@@ -277,9 +276,9 @@ export default class TaskClient {
         >(query);
         return {
           ...response,
-          result: response.result
-            .slice(skip)
-            .map(doc => TaskImpl.create(this._client, this._interceptor, doc))
+          result: response.result.map(doc =>
+            TaskImpl.create(this._client, this._interceptor, doc)
+          )
         };
       }
     );
@@ -347,10 +346,9 @@ export default class TaskClient {
     const skip = options.skip || 0;
     const top = options.top || DEFAULT_PAGE_SIZE;
 
-    // TODO: no skip support yet in Cosmos DB so we have to do the skip
-    // client side for now.
     const query = buildQuery({
-      limit: skip + top,
+      offset: skip,
+      limit: top,
       filter: options.filter,
       sort: options.sortExpression,
       sortOrder: options.sortOrder
@@ -367,9 +365,9 @@ export default class TaskClient {
         >(query);
         return {
           ...response,
-          result: response.result
-            .slice(skip)
-            .map(doc => TaskImpl.create(this._client, this._interceptor, doc))
+          result: response.result.map(doc =>
+            TaskImpl.create(this._client, this._interceptor, doc)
+          )
         };
       }
     );
@@ -399,10 +397,9 @@ export default class TaskClient {
     const skip = options.skip || 0;
     const top = options.top || DEFAULT_PAGE_SIZE;
 
-    // TODO: no skip support yet in Cosmos DB so we have to do the skip
-    // client side for now.
     const query = buildQuery({
-      limit: skip + top,
+      offset: skip,
+      limit: top,
       projection: summaryProjection(options.project),
       filter: typeFilter(type, options.filter),
       sort: options.sortExpression,
@@ -420,11 +417,9 @@ export default class TaskClient {
         >(query);
         return {
           ...response,
-          result: response.result
-            .slice(skip)
-            .map(doc =>
-              ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
-            )
+          result: response.result.map(doc =>
+            ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
+          )
         };
       }
     );
@@ -510,10 +505,9 @@ export default class TaskClient {
     const skip = options.skip || 0;
     const top = options.top || DEFAULT_PAGE_SIZE;
 
-    // TODO: no skip support yet in Cosmos DB so we have to do the skip
-    // client side for now.
     const query = buildQuery({
-      limit: skip + top,
+      offset: skip,
+      limit: top,
       projection: summaryProjection(options.project),
       filter: options.filter,
       sort: options.sortExpression,
@@ -531,11 +525,9 @@ export default class TaskClient {
         >(query);
         return {
           ...response,
-          result: response.result
-            .slice(skip)
-            .map(doc =>
-              ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
-            )
+          result: response.result.map(doc =>
+            ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
+          )
         };
       }
     );

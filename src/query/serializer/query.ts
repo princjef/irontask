@@ -17,6 +17,7 @@ import serializeProjection from './projection';
  * @param config Object representation of the query to build
  */
 export default function build(config: {
+  offset?: number;
   limit?: number;
   rawProjection?: string;
   projection?: Type.AnyProperty[];
@@ -26,11 +27,15 @@ export default function build(config: {
 }): Required<SqlQuerySpec> {
   let paramIndex = 0;
 
-  const limit =
-    config.limit !== undefined
+  const paging =
+    config.offset !== undefined && config.limit !== undefined
       ? ({
-          query: 'TOP @limit',
+          query: 'OFFSET @offset LIMIT @limit',
           parameters: [
+            {
+              name: '@offset',
+              value: config.offset
+            },
             {
               name: '@limit',
               value: config.limit
@@ -63,7 +68,7 @@ export default function build(config: {
       : undefined;
 
   return {
-    query: `SELECT ${limit ? limit.query : ''} ${projection}
+    query: `SELECT ${projection}
             FROM c
             ${filter ? `WHERE ${filter.query}` : ''}
             ${
@@ -72,11 +77,12 @@ export default function build(config: {
                     config.sortOrder === 'DESC' ? 'DESC' : 'ASC'
                   }`
                 : ''
-            }`,
+            }
+            ${paging ? paging.query : ''}`,
     parameters: [
-      ...(limit ? limit.parameters : []),
       ...(filter ? filter.parameters : []),
-      ...(sort ? sort.parameters : [])
+      ...(sort ? sort.parameters : []),
+      ...(paging ? paging.parameters : [])
     ]
   };
 }
