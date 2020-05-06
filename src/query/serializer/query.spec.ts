@@ -17,19 +17,47 @@ describe('#buildQuery', () => {
     });
   });
 
-  it('limit', () => {
+  it('paging', () => {
     expect(
       normalize(
         buildQuery({
+          offset: 0,
           limit: 10
         })
       )
     ).toEqual({
-      query: 'SELECT TOP @limit * FROM c',
+      query: 'SELECT * FROM c OFFSET @offset LIMIT @limit',
       parameters: [
+        {
+          name: '@offset',
+          value: 0
+        },
         {
           name: '@limit',
           value: 10
+        }
+      ]
+    });
+  });
+
+  it('paging 2', () => {
+    expect(
+      normalize(
+        buildQuery({
+          offset: 5,
+          limit: 25
+        })
+      )
+    ).toEqual({
+      query: 'SELECT * FROM c OFFSET @offset LIMIT @limit',
+      parameters: [
+        {
+          name: '@offset',
+          value: 5
+        },
+        {
+          name: '@limit',
+          value: 25
         }
       ]
     });
@@ -127,6 +155,7 @@ describe('#buildQuery', () => {
     expect(
       normalize(
         buildQuery({
+          offset: 10,
           limit: 10,
           projection: [p.base('a'), p.base('b')],
           filter: q.and(
@@ -139,15 +168,12 @@ describe('#buildQuery', () => {
       )
     ).toEqual(
       normalize({
-        query: `SELECT TOP @limit VALUE { "a": c["a"], "b": c["b"] }
+        query: `SELECT VALUE { "a": c["a"], "b": c["b"] }
                 FROM c
                 WHERE ((c["a"] = @p0) AND (c["b"] > @p1))
-                ORDER BY INDEX_OF(c["a"], @p2) DESC`,
+                ORDER BY INDEX_OF(c["a"], @p2) DESC
+                OFFSET @offset LIMIT @limit`,
         parameters: [
-          {
-            name: '@limit',
-            value: 10
-          },
           {
             name: '@p0',
             value: 1
@@ -159,6 +185,14 @@ describe('#buildQuery', () => {
           {
             name: '@p2',
             value: 'abc'
+          },
+          {
+            name: '@offset',
+            value: 10
+          },
+          {
+            name: '@limit',
+            value: 10
           }
         ]
       })
