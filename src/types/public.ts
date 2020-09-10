@@ -55,3 +55,14 @@ export interface TimeoutsOptions {
    */
   retries?: number;
 }
+
+export interface TaskEnableOptions {
+  /**
+   * Enable a recurring task and recompute next run time
+   *
+   * @defaultValue false
+   *
+   * @public
+   */
+  recomputeNextRunTime?: boolean;
+}
