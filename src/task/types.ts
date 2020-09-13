@@ -155,6 +155,13 @@ export interface TaskBase<T> {
   readonly interval?: string | number;
 
   /**
+   * If defined, the schedule task will end at this time.
+   *
+   * @public
+   */
+  readonly endTime?: Date;
+
+  /**
    * Convert the task to a serialization-friendly format
    *
    * @public
@@ -312,6 +319,13 @@ export interface SerializedTask<T> {
    * @public
    */
   interval?: string | number;
+
+  /**
+   * If defined, the schedule task will end at this time.
+   *
+   * @public
+   */
+  readonly endTime?: Date;
 }
 
 /**

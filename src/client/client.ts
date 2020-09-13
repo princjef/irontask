@@ -31,7 +31,7 @@ import {
 } from '../task';
 import { Omit, RecursiveRequired } from '../types/internal';
 import batchIterator from '../utils/batchIterator';
-import computeNextRun from '../utils/computeNextRun';
+import computeNextRun, { isValidNextRun } from '../utils/computeNextRun';
 
 import CosmosDbClient from './cosmos';
 import ListenerImpl, { Listener } from './listener';
@@ -178,6 +178,19 @@ export default class TaskClient {
 
         const now = Date.now();
 
+        // Calculate nextRunTime
+        let nextRunTime = computeNextRun(
+          definedOptions.interval,
+          undefined,
+          definedOptions.taskEndTime
+        );
+        if (definedOptions.scheduledTime) {
+          nextRunTime = isValidNextRun(
+            definedOptions.scheduledTime.getTime(),
+            definedOptions.taskEndTime
+          );
+        }
+
         const task: NewTaskDocument<T> = {
           id,
           config: {
@@ -188,14 +201,15 @@ export default class TaskClient {
                 : true,
             createTime: now,
             lockedUntilTime: 0,
-            nextRunTime:
-              definedOptions.scheduledTime !== undefined
-                ? definedOptions.scheduledTime.getTime()
-                : computeNextRun(definedOptions.interval),
+            nextRunTime,
             deliveries: 0,
             attempts: 0,
             runs: 0,
             interval: definedOptions.interval,
+            endTime:
+              definedOptions.taskEndTime !== undefined
+                ? definedOptions.taskEndTime.getTime()
+                : undefined,
             ttlMs: definedOptions.ttlMs,
             maxExecutionTimeMs: definedOptions.maxExecutionTimeMs
           },

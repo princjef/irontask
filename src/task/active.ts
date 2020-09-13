@@ -107,6 +107,10 @@ export default class ActiveTaskImpl<T> extends EventEmitter
     return this._data.interval;
   }
 
+  get endTime(): Date | undefined {
+    return this._data.endTime;
+  }
+
   get locked(): boolean {
     return (
       (this._data.document.config.lockToken === this._lockToken ||
@@ -263,7 +267,11 @@ export default class ActiveTaskImpl<T> extends EventEmitter
             ...this._finishPatches.scheduleNextRun(
               nextRunDelayMs !== undefined
                 ? this._data.timestamp() + nextRunDelayMs
-                : computeNextRun(this.interval, this._processingStart)
+                : computeNextRun(
+                    this.interval,
+                    this._processingStart,
+                    this.endTime
+                  )
             )
           },
           savePayload,
@@ -289,7 +297,11 @@ export default class ActiveTaskImpl<T> extends EventEmitter
             ...this._finishPatches.scheduleNextRun(
               nextRunDelayMs !== undefined
                 ? nextRunDelayMs + this._data.timestamp()
-                : computeNextRun(this.interval, this._processingStart)
+                : computeNextRun(
+                    this.interval,
+                    this._processingStart,
+                    this.endTime
+                  )
             )
           },
           savePayload,

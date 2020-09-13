@@ -83,6 +83,10 @@ export default class TaskImpl<T> implements Task<T> {
     return this._data.interval;
   }
 
+  get endTime(): Date | undefined {
+    return this._data.endTime;
+  }
+
   private _data: TaskData<T>;
 
   private _interceptor: InterceptorProcessor;
