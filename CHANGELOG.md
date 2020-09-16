@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/princjef/irontask/compare/v1.2.0...v1.3.0) (2020-09-16)
+
+
+### Features
+
+* skip past task occurrences when enabling a disabled task ([#35](https://github.com/princjef/irontask/issues/35)) ([f1a3346](https://github.com/princjef/irontask/commit/f1a334673e02c04db0db3cf1036e8d88b59a6687))
+
 # [1.2.0](https://github.com/princjef/irontask/compare/v1.1.4...v1.2.0) (2020-05-06)
 
 
