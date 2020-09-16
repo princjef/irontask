@@ -182,12 +182,12 @@ export default class TaskClient {
         let nextRunTime = computeNextRun(
           definedOptions.interval,
           undefined,
-          definedOptions.taskEndTime
+          definedOptions.lastRunTime
         );
         if (definedOptions.scheduledTime) {
           nextRunTime = isValidNextRun(
             definedOptions.scheduledTime.getTime(),
-            definedOptions.taskEndTime
+            definedOptions.lastRunTime
           );
         }
 
@@ -206,9 +206,9 @@ export default class TaskClient {
             attempts: 0,
             runs: 0,
             interval: definedOptions.interval,
-            endTime:
-              definedOptions.taskEndTime !== undefined
-                ? definedOptions.taskEndTime.getTime()
+            lastRunTime:
+              definedOptions.lastRunTime !== undefined
+                ? definedOptions.lastRunTime.getTime()
                 : undefined,
             ttlMs: definedOptions.ttlMs,
             maxExecutionTimeMs: definedOptions.maxExecutionTimeMs

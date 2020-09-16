@@ -159,7 +159,7 @@ export interface TaskBase<T> {
    *
    * @public
    */
-  readonly endTime?: Date;
+  readonly lastRunTime?: Date;
 
   /**
    * Convert the task to a serialization-friendly format
@@ -321,11 +321,11 @@ export interface SerializedTask<T> {
   interval?: string | number;
 
   /**
-   * If defined, the schedule task will end at this time.
+   * If defined, the task will not schedule any runs past this time.
    *
    * @public
    */
-  readonly endTime?: Date;
+  readonly lastRunTime?: Date;
 }
 
 /**

@@ -19,9 +19,9 @@ describe('#computeNextRun', () => {
     const now = Date.now();
     jest.spyOn(Date, 'now').mockImplementation(() => now);
 
-    const endTime = new Date(now + 1000);
+    const lastRunTime = new Date(now + 1000);
     const previous = now - 100;
-    expect(computeNextRun(10000, previous, endTime)).toBe(undefined);
+    expect(computeNextRun(10000, previous, lastRunTime)).toBe(undefined);
   });
 
   it('sets the time to undefined for a finished cron schedule', () => {
@@ -31,9 +31,9 @@ describe('#computeNextRun', () => {
     const minuteStart = moment(now).startOf('minute');
     const minutesIn = minuteStart.minutes() % 5;
 
-    const endTime = minuteStart.add(5 - minutesIn, 'minutes').toDate();
+    const lastRunTime = minuteStart.add(5 - minutesIn, 'minutes').toDate();
     const previous = now - 100;
-    expect(computeNextRun('*/10 * * * *', previous, endTime)).toBe(undefined);
+    expect(computeNextRun('*/10 * * * *', previous, lastRunTime)).toBe(undefined);
   });
 
   it('sets the time to now for the first run of a task with a numeric interval', () => {

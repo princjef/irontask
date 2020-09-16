@@ -94,8 +94,8 @@ export default class ReadonlyTaskImpl<T> implements ReadonlyTask<T> {
     return this._data.interval;
   }
 
-  get endTime(): Date | undefined {
-    return this._data.endTime;
+  get lastRunTime(): Date | undefined {
+    return this._data.lastRunTime;
   }
 
   private _data: TaskData<T>;

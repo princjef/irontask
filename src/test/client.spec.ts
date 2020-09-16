@@ -163,7 +163,7 @@ describe('Client', () => {
         .add(5, 'minutes')
         .toDate();
 
-      const endTime = moment()
+      const lastRunTime = moment()
         .add(4, 'minutes')
         .toDate();
 
@@ -173,7 +173,7 @@ describe('Client', () => {
         {
           interval: 60000, // 10 minutes
           scheduledTime: startTime,
-          taskEndTime: endTime
+          lastRunTime: lastRunTime
         }
       );
 
@@ -181,7 +181,7 @@ describe('Client', () => {
       expect(task.status).toBe(TaskStatus.Failed);
       expect(task.nextRunTime).toBe(undefined);
       expect(task.interval).toBe(60000);
-      expect(task.endTime!.getTime()).toBe(endTime.getTime());
+      expect(task.lastRunTime!.getTime()).toBe(lastRunTime.getTime());
     });
 
     it('supports tasks that are disabled by default', async () => {

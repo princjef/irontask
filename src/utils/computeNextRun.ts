@@ -14,11 +14,12 @@ import IronTaskError, { ErrorCode } from '../error';
  * @param interval      Number of milliseconds between runs or cron string.
  * @param previousStart If there was a previous run, the time when that run
  *                      started
+ * @param lastRunTime   The last valid time nextRunTime can be set to.
  */
 export default function computeNextRun(
   interval?: string | number,
   previousStart?: number,
-  endTime?: Date
+  lastRunTime?: Date
 ): number | undefined {
   // Cron strings are treated the same way regardless of whether this is a
   // first run or not. We just compute the next valid time and use it.
@@ -31,7 +32,7 @@ export default function computeNextRun(
           })
           .next()
           .getTime(),
-        endTime
+        lastRunTime
       );
     } catch (e) {
       throw new IronTaskError(ErrorCode.INVALID_CRON_STRING_INTERVAL, e);
@@ -40,13 +41,13 @@ export default function computeNextRun(
 
   // For non-cron strings, the first run is always the current time by default
   if (!previousStart) {
-    return isValidNextRun(Date.now(), endTime);
+    return isValidNextRun(Date.now(), lastRunTime);
   }
 
   // If there is an interval and this is not the first run, just compute the
   // next run by adding the interval to the current time.
   if (interval) {
-    return isValidNextRun(previousStart + interval, endTime);
+    return isValidNextRun(previousStart + interval, lastRunTime);
   }
 
   // If we get here, it is not the first run and there is no interval, so we
@@ -57,15 +58,15 @@ export default function computeNextRun(
 /**
  * Return the next run time for a task. Returns undefined if the schedule end time has been reached
  *
- * @param endTime User defined schedule end time
  * @param nextRunTime Next scheduled run of the task
+ * @param lastRunTime User defined schedule end time
  */
 export function isValidNextRun(
   nextRunTime: number,
-  endTime?: Date
+  lastRunTime?: Date
 ): number | undefined {
   // If schedule for the task has completed we do not want to schedule next run
-  if (endTime && endTime.getTime() <= nextRunTime) {
+  if (lastRunTime && lastRunTime.getTime() <= nextRunTime) {
     return undefined;
   }
   return nextRunTime;

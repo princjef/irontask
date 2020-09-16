@@ -144,7 +144,7 @@ export interface CreateTaskOptions {
    * The end time for a task. If not defined the task will never expire.
    * This will not affect any "non-terminal" acknowledgements (i.e. defer, retry, release)
    */
-  taskEndTime?: Date;
+  lastRunTime?: Date;
 
   /**
    * If specified, the amount of time in milliseconds to retain a completed or

@@ -107,8 +107,8 @@ export default class ActiveTaskImpl<T> extends EventEmitter
     return this._data.interval;
   }
 
-  get endTime(): Date | undefined {
-    return this._data.endTime;
+  get lastRunTime(): Date | undefined {
+    return this._data.lastRunTime;
   }
 
   get locked(): boolean {
@@ -270,7 +270,7 @@ export default class ActiveTaskImpl<T> extends EventEmitter
                 : computeNextRun(
                     this.interval,
                     this._processingStart,
-                    this.endTime
+                    this.lastRunTime
                   )
             )
           },
@@ -300,7 +300,7 @@ export default class ActiveTaskImpl<T> extends EventEmitter
                 : computeNextRun(
                     this.interval,
                     this._processingStart,
-                    this.endTime
+                    this.lastRunTime
                   )
             )
           },
