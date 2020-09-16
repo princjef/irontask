@@ -112,7 +112,11 @@ export default class TaskImpl<T> implements Task<T> {
 
     // Patch task with enable options
     if (options && !!options.recomputeNextRunTime) {
-      const nextRunTime = computeNextRun(this._data.interval, Date.now());
+      const nextRunTime = computeNextRun(
+        this._data.interval,
+        Date.now(),
+        this._data.lastRunTime
+      );
       patchOp = async () =>
         this._data.patch(() => ({ enabled: true, nextRunTime }));
     }
