@@ -7,6 +7,8 @@ import * as util from 'util';
 
 import { CosmosDbClient } from '../client';
 import Interceptors, { InterceptorProcessor } from '../interceptor';
+import { TaskEnableOptions } from '../types/public';
+import computeNextRun from '../utils/computeNextRun';
 
 import TaskData from './data';
 import { ResolvedTaskDocument } from './document';
@@ -105,12 +107,21 @@ export default class TaskImpl<T> implements Task<T> {
     );
   }
 
-  async enable(): Promise<void> {
+  async enable(options?: TaskEnableOptions): Promise<void> {
+    let patchOp = async () => this._data.patch(() => ({ enabled: true }));
+
+    // Patch task with enable options
+    if (options && !!options.recomputeNextRunTime) {
+      const nextRunTime = computeNextRun(this._data.interval, Date.now());
+      patchOp = async () =>
+        this._data.patch(() => ({ enabled: true, nextRunTime }));
+    }
+
     await this._interceptor.task(
       this,
       Interceptors.TaskOperation.Enable,
       this._data.ref,
-      async () => this._data.patch(() => ({ enabled: true }))
+      patchOp
     );
   }
 
@@ -182,8 +193,9 @@ export interface Task<T> extends TaskBase<T> {
    * Enable the task for processing.
    *
    * @public
+   * @param options Task Enable Options
    */
-  enable(): Promise<void>;
+  enable(options?: TaskEnableOptions): Promise<void>;
 
   /**
    * Disable the task for processing. If the task is currently running, the
