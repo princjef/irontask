@@ -33,7 +33,9 @@ describe('#computeNextRun', () => {
 
     const lastRunTime = minuteStart.add(5 - minutesIn, 'minutes').toDate();
     const previous = now - 100;
-    expect(computeNextRun('*/10 * * * *', previous, lastRunTime)).toBe(undefined);
+    expect(computeNextRun('*/10 * * * *', previous, lastRunTime)).toBe(
+      undefined
+    );
   });
 
   it('sets the time to now for the first run of a task with a numeric interval', () => {

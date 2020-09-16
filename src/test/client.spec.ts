@@ -173,7 +173,7 @@ describe('Client', () => {
         {
           interval: 60000, // 10 minutes
           scheduledTime: startTime,
-          lastRunTime: lastRunTime
+          lastRunTime
         }
       );
 
