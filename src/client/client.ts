@@ -49,6 +49,7 @@ import {
   TaskClientOptions,
   TaskHandler
 } from './types';
+import { TaskEnableOptions } from '../types/public';
 
 // Async iterator polyfill for Node <10
 if (!Symbol.asyncIterator) {
@@ -837,16 +838,17 @@ export default class TaskClient {
    * @param type    - Task type
    * @param filter  - Query filter specifying which tasks within the provided
    *                  type to enable
+   * @param options - Task enable options
    *
    * @public
    */
-  async enable(type: string, filter?: QueryType.Bool): Promise<void> {
+  async enable(type: string, filter?: QueryType.Bool, options?: TaskEnableOptions): Promise<void> {
     await this._bulkUpdate(
       Interceptors.TaskClientOperation.Enable,
       Interceptors.TaskOperation.Enable,
       type,
       buildQuery({ filter: typeFilter(type, filter) }),
-      async task => task.enable()
+      async task => task.enable(options)
     );
   }
 
@@ -861,16 +863,17 @@ export default class TaskClient {
    * especially when paging and/or sorting results. Use this API with care.
    *
    * @param filter  - Query filter specifying which tasks to enable
+   * @param options - Task enable options
    *
    * @public
    */
-  async enableAll(filter?: QueryType.Bool): Promise<void> {
+  async enableAll(filter?: QueryType.Bool, options?: TaskEnableOptions): Promise<void> {
     await this._bulkUpdate(
       Interceptors.TaskClientOperation.EnableAll,
       Interceptors.TaskOperation.Enable,
       undefined,
       buildQuery({ filter }),
-      async task => task.enable()
+      async task => task.enable(options)
     );
   }
 
