@@ -212,6 +212,47 @@ describe('Task', () => {
       expect(serverTask!.nextRunTime!.getTime()).toBeGreaterThan(Date.now());
     });
 
+    it('completes a scheduled task if nextRunTime is greater than lastRunTime', async () => {
+      const now = Date.now();
+      // Create a disabled task with a scheduled time in the past
+      const task = await client.create(
+        type,
+        {},
+        {
+          enabled: false,
+          interval: 1000,
+          scheduledTime: new Date(now + 1000),
+          lastRunTime: new Date(now + 4000)
+        }
+      );
+      expect(task.status).toBe(TaskStatus.Disabled);
+
+      const options: TaskEnableOptions = {
+        recomputeNextRunTime: true
+      };
+
+      // Enable the task
+      await task.enable(options);
+      expect(task.status).toBe(TaskStatus.Scheduled);
+
+      // Disable task
+      await task.disable();
+
+      // Wait for lastRunTime to expire
+      await new Promise(resolve => setTimeout(resolve, 4000));
+
+      // Enable the task again. Task status is failed because there are no future or past runs
+      await task.enable(options);
+      expect(task.status).toBe(TaskStatus.Failed);
+
+      // Check the task on the server. It should be enabled too
+      const serverTask = await client.get<any>(type, task.id);
+      expect(serverTask).toBeDefined();
+      expect(serverTask!.status).toBe(TaskStatus.Failed);
+      expect(serverTask!.enabled).toBe(true);
+      expect(serverTask!.nextRunTime).toBe(undefined);
+    });
+
     it('does nothing for tasks that are already enabled', async () => {
       // Create an enabled task
       const task = await client.create(type, {}, { enabled: true });
