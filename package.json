@@ -1,6 +1,6 @@
 {
   "name": "irontask",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Persistent, queryable task scheduling for Azure Cosmos DB",
   "keywords": [
     "task",

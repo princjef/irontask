@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/princjef/irontask/compare/v1.3.0...v1.4.0) (2020-09-16)
+
+
+### Features
+
+* add lastRunTime option on task create ([#37](https://github.com/princjef/irontask/issues/37)) ([6b24c73](https://github.com/princjef/irontask/commit/6b24c73a5fdf3042dfa1b0b373aeb8ea40bd2e82))
+
 # [1.3.0](https://github.com/princjef/irontask/compare/v1.2.0...v1.3.0) (2020-09-16)
 
 
