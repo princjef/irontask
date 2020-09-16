@@ -30,6 +30,7 @@ import {
   typeFilter
 } from '../task';
 import { Omit, RecursiveRequired } from '../types/internal';
+import { TaskEnableOptions } from '../types/public';
 import batchIterator from '../utils/batchIterator';
 import computeNextRun from '../utils/computeNextRun';
 
@@ -49,7 +50,6 @@ import {
   TaskClientOptions,
   TaskHandler
 } from './types';
-import { TaskEnableOptions } from '../types/public';
 
 // Async iterator polyfill for Node <10
 if (!Symbol.asyncIterator) {
@@ -842,7 +842,11 @@ export default class TaskClient {
    *
    * @public
    */
-  async enable(type: string, filter?: QueryType.Bool, options?: TaskEnableOptions): Promise<void> {
+  async enable(
+    type: string,
+    filter?: QueryType.Bool,
+    options?: TaskEnableOptions
+  ): Promise<void> {
     await this._bulkUpdate(
       Interceptors.TaskClientOperation.Enable,
       Interceptors.TaskOperation.Enable,
@@ -867,7 +871,10 @@ export default class TaskClient {
    *
    * @public
    */
-  async enableAll(filter?: QueryType.Bool, options?: TaskEnableOptions): Promise<void> {
+  async enableAll(
+    filter?: QueryType.Bool,
+    options?: TaskEnableOptions
+  ): Promise<void> {
     await this._bulkUpdate(
       Interceptors.TaskClientOperation.EnableAll,
       Interceptors.TaskOperation.Enable,
