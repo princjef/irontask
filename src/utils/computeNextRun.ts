@@ -7,6 +7,8 @@ import * as cron from 'cron-parser';
 
 import IronTaskError, { ErrorCode } from '../error';
 
+import isValidNextRun from './isValidNextRun';
+
 /**
  * Computes the unix ms epoch when the task should be run next from the interval,
  * if one is provided. If no time is returned, the task should not be run again.
@@ -53,21 +55,4 @@ export default function computeNextRun(
   // If we get here, it is not the first run and there is no interval, so we
   // have no more runs to do.
   return undefined;
-}
-
-/**
- * Return the next run time for a task. Returns undefined if the schedule end time has been reached
- *
- * @param nextRunTime Next scheduled run of the task
- * @param lastRunTime User defined schedule end time
- */
-export function isValidNextRun(
-  nextRunTime: number,
-  lastRunTime?: Date
-): number | undefined {
-  // If schedule for the task has completed we do not want to schedule next run
-  if (lastRunTime && lastRunTime.getTime() <= nextRunTime) {
-    return undefined;
-  }
-  return nextRunTime;
 }

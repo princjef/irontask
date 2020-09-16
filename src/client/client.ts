@@ -31,7 +31,8 @@ import {
 } from '../task';
 import { Omit, RecursiveRequired } from '../types/internal';
 import batchIterator from '../utils/batchIterator';
-import computeNextRun, { isValidNextRun } from '../utils/computeNextRun';
+import computeNextRun from '../utils/computeNextRun';
+import isValidNextRun from '../utils/isValidNextRun';
 
 import CosmosDbClient from './cosmos';
 import ListenerImpl, { Listener } from './listener';
