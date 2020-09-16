@@ -13,7 +13,7 @@ import IronTaskError, { ErrorCode } from '../error';
  *
  * @param interval      Number of milliseconds between runs or cron string.
  * @param previousStart If there was a previous run, the time when that run
- *                      started
+ *                      started.
  */
 export default function computeNextRun(
   interval?: string | number,

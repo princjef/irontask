@@ -13,6 +13,7 @@ import TaskClient, {
   TaskClientOptions,
   TaskStatus
 } from '..';
+import { TaskEnableOptions } from '../types/public';
 
 import initialize from './harness';
 
@@ -180,6 +181,35 @@ describe('Task', () => {
       expect(serverTask).toBeDefined();
       expect(serverTask!.status).toBe(TaskStatus.Pending);
       expect(serverTask!.enabled).toBe(true);
+    });
+
+    it('enables the task with options', async () => {
+      // Create a disabled task with a scheduled time in the past
+      const task = await client.create(
+        type,
+        {},
+        {
+          enabled: false,
+          interval: '*/1 * * * *',
+          scheduledTime: new Date(Date.now() - 5 * 60 * 1000)
+        }
+      );
+      expect(task.status).toBe(TaskStatus.Disabled);
+
+      const options: TaskEnableOptions = {
+        recomputeNextRunTime: true
+      };
+
+      // Enable the task
+      await task.enable(options);
+      expect(task.status).toBe(TaskStatus.Scheduled);
+
+      // Check the task on the server. It should be enabled too
+      const serverTask = await client.get<any>(type, task.id);
+      expect(serverTask).toBeDefined();
+      expect(serverTask!.status).toBe(TaskStatus.Scheduled);
+      expect(serverTask!.enabled).toBe(true);
+      expect(serverTask!.nextRunTime!.getTime()).toBeGreaterThan(Date.now());
     });
 
     it('does nothing for tasks that are already enabled', async () => {
