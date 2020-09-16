@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/princjef/irontask/compare/v1.4.0...v1.4.1) (2020-09-16)
+
+
+### Bug Fixes
+
+* use lastRunTime when re-enabling a task ([#38](https://github.com/princjef/irontask/issues/38)) ([5988585](https://github.com/princjef/irontask/commit/59885858e7c168663a0ef5c8227e900474f162eb))
+
 # [1.4.0](https://github.com/princjef/irontask/compare/v1.3.0...v1.4.0) (2020-09-16)
 
 
