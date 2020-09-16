@@ -158,6 +158,32 @@ describe('Client', () => {
       expect(task.interval).toBe(60000);
     });
 
+    it('supports ending a task at a user defined end date', async () => {
+      const startTime = moment()
+        .add(5, 'minutes')
+        .toDate();
+
+      const lastRunTime = moment()
+        .add(4, 'minutes')
+        .toDate();
+
+      const task = await client.create(
+        type,
+        { hello: 'world' },
+        {
+          interval: 60000, // 10 minutes
+          scheduledTime: startTime,
+          lastRunTime
+        }
+      );
+
+      // The task will fail because it will have no last run and no next run
+      expect(task.status).toBe(TaskStatus.Failed);
+      expect(task.nextRunTime).toBe(undefined);
+      expect(task.interval).toBe(60000);
+      expect(task.lastRunTime!.getTime()).toBe(lastRunTime.getTime());
+    });
+
     it('supports tasks that are disabled by default', async () => {
       const task = await client.create(
         type,

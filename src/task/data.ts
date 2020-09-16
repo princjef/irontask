@@ -98,6 +98,12 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
     return this.document.config.interval;
   }
 
+  get lastRunTime(): Date | undefined {
+    return this.document.config.lastRunTime
+      ? new Date(this.document.config.lastRunTime)
+      : undefined;
+  }
+
   get document(): ResolvedTaskDocument<T> {
     return this._document;
   }

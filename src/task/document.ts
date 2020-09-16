@@ -106,6 +106,11 @@ export interface TaskDocument<T> {
     interval?: string | number;
 
     /**
+     * If defined, the task will not schedule any runs past this time.
+     */
+    lastRunTime?: number;
+
+    /**
      * Amount of time in milliseconds to hold the task in completed or failed
      * state (with no future runs scheduled) before deleting.
      */
