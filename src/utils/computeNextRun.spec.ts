@@ -90,4 +90,17 @@ describe('#computeNextRun', () => {
     // Every 5 minutes
     expect(computeNextRun('*/12 * * * *', previous)).toBe(nextRun);
   });
+
+  it('sets the time to the last day of the month', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+
+    const lastDayOfMonth = moment()
+      .endOf('month')
+      .date();
+    const nextRuntime = computeNextRun('10 20 L * *');
+
+    expect(nextRuntime).toBeDefined();
+    expect(new Date(nextRuntime!).getDate()).toBe(lastDayOfMonth);
+  });
 });
