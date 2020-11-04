@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/princjef/irontask/compare/v1.4.1...v1.5.0) (2020-11-04)
+
+
+### Features
+
+* add support for last day of the month cron string ([#39](https://github.com/princjef/irontask/issues/39)) ([34d7436](https://github.com/princjef/irontask/commit/34d74366d9ebf30f03285c5a6b491545b1fc67c5))
+
 ## [1.4.1](https://github.com/princjef/irontask/compare/v1.4.0...v1.4.1) (2020-09-16)
 
 
