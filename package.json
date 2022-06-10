@@ -76,7 +76,7 @@
     "opener": "^1.5.1",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.2",
-    "semantic-release": "^17.0.7",
+    "semantic-release": "^19.0.3",
     "ts-jest": "^25.4.0",
     "tslint": "^5.20.1",
     "typescript": "^3.8.3"
