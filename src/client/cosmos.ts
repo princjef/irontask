@@ -10,6 +10,7 @@ import {
   Container,
   ContainerDefinition,
   CosmosClient,
+  CosmosClientOptions,
   CosmosHeaders,
   FeedResponse,
   Resource,
@@ -17,6 +18,7 @@ import {
   Response,
   SqlQuerySpec
 } from '@azure/cosmos';
+import { ChainedTokenCredential } from '@azure/identity';
 
 import {
   CONTINUATION_HEADER,
@@ -47,9 +49,14 @@ export default class CosmosDbClient {
     collection: string,
     key: string,
     collectionOptions: Omit<ContainerDefinition, 'id'>,
-    retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
+    retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS,
+    managedIdentity?: ChainedTokenCredential,
   ) {
     try {
+      // If managed identity is available, use that authentication model.
+      // Otherwise default to the secret key.
+      const authModel: Partial<CosmosClientOptions> = managedIdentity ? { aadCredentials: managedIdentity } : { key };
+    
       // TODO: look into reducing request timeout
       const connectionPolicy: ConnectionPolicy = {
         retryOptions: {
@@ -60,9 +67,9 @@ export default class CosmosDbClient {
       };
       const client = new CosmosClient({
         endpoint: account,
-        key,
         connectionPolicy,
-        consistencyLevel: 'Session'
+        consistencyLevel: 'Session',
+        ...authModel,
       });
       const { database: db } = await client.databases.createIfNotExists(
         {
