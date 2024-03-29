@@ -36,6 +36,7 @@ const ERROR_RU = Symbol('CosmosDB Error RU');
 
 const retryableNetworkingErrors = ['ECONNREFUSED', 'EAI_AGAIN'];
 
+export { ChainedTokenCredential };
 export default class CosmosDbClient {
   private _endpoint: string;
   private _client: Container;
@@ -150,8 +151,8 @@ export default class CosmosDbClient {
             sessionToken: this._session
           })
           .fetchAll() as unknown) as FeedResponse<T> & {
-          headers: CosmosHeaders;
-        }
+            headers: CosmosHeaders;
+          }
     );
   }
 
@@ -171,8 +172,8 @@ export default class CosmosDbClient {
             maxItemCount: options.pageSize
           })
           .fetchNext() as unknown) as FeedResponse<T> & {
-          headers: CosmosHeaders;
-        }
+            headers: CosmosHeaders;
+          }
     );
   }
 
@@ -184,7 +185,7 @@ export default class CosmosDbClient {
         sessionToken: this._session
       })
       .getAsyncIterator()
-      [Symbol.asyncIterator]();
+    [Symbol.asyncIterator]();
 
     const modifiedIterator: AsyncIterable<AnnotatedResponse<T[]>> = {
       [Symbol.asyncIterator]: () => ({
