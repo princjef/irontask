@@ -4,6 +4,7 @@
  */
 
 import { SqlQuerySpec } from '@azure/cosmos';
+import { ChainedTokenCredential } from '@azure/identity';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -85,14 +86,17 @@ export default class TaskClient {
     account: string,
     database: string,
     collection: string,
-    key: string,
+    connectionInfo: {
+      key?: string;
+      aadCredentials?: ChainedTokenCredential;
+    },
     options?: TaskClientOptions
   ) {
     const cosmosClient = await CosmosDbClient.create(
       account,
       database,
       collection,
-      key,
+      connectionInfo,
       {
         partitionKey: {
           paths: ['/config/type']
@@ -335,7 +339,11 @@ export default class TaskClient {
           ...response,
           result: this._addContinuation(
             response.result.map(doc =>
-              TaskImpl.create(this._client, this._interceptor, doc)
+              TaskImpl.create(
+                this._client,
+                this._interceptor,
+                doc as ResolvedTaskDocument<T>
+              )
             ),
             response.continuation!
           )
@@ -486,7 +494,11 @@ export default class TaskClient {
           ...response,
           result: this._addContinuation(
             response.result.map(doc =>
-              ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
+              ReadonlyTaskImpl.create(
+                this._client,
+                this._interceptor,
+                doc as ResolvedTaskDocument<T>
+              )
             ),
             response.continuation
           )

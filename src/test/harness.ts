@@ -39,7 +39,7 @@ export default async function initialize(options?: TaskClientOptions) {
     account,
     database,
     collection,
-    key,
+    { key },
     options
   );
 
