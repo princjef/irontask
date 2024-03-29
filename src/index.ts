@@ -12,6 +12,7 @@ export { IronTaskError, Interceptors };
 
 export {
   ArrayWithContinuation,
+  ChainedTokenCredential,
   CreateTaskOptions,
   IterateOptions,
   IterateSummaryOptions,

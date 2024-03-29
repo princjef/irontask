@@ -4,9 +4,9 @@
  */
 
 import TaskClient from './client';
-import CosmosDbClient from './cosmos';
+import CosmosDbClient, { ChainedTokenCredential } from './cosmos';
 import { Listener } from './listener';
 import ScopedTaskClient from './scoped';
 
-export { CosmosDbClient, Listener, ScopedTaskClient, TaskClient };
+export { ChainedTokenCredential, CosmosDbClient, Listener, ScopedTaskClient, TaskClient };
 export * from './types';

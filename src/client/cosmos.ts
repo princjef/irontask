@@ -151,8 +151,8 @@ export default class CosmosDbClient {
             sessionToken: this._session
           })
           .fetchAll() as unknown) as FeedResponse<T> & {
-            headers: CosmosHeaders;
-          }
+          headers: CosmosHeaders;
+        }
     );
   }
 
@@ -172,8 +172,8 @@ export default class CosmosDbClient {
             maxItemCount: options.pageSize
           })
           .fetchNext() as unknown) as FeedResponse<T> & {
-            headers: CosmosHeaders;
-          }
+          headers: CosmosHeaders;
+        }
     );
   }
 
@@ -185,7 +185,7 @@ export default class CosmosDbClient {
         sessionToken: this._session
       })
       .getAsyncIterator()
-    [Symbol.asyncIterator]();
+      [Symbol.asyncIterator]();
 
     const modifiedIterator: AsyncIterable<AnnotatedResponse<T[]>> = {
       [Symbol.asyncIterator]: () => ({
