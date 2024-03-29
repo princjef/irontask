@@ -10,7 +10,6 @@ import {
   Container,
   ContainerDefinition,
   CosmosClient,
-  CosmosClientOptions,
   CosmosHeaders,
   FeedResponse,
   Resource,
@@ -48,11 +47,11 @@ export default class CosmosDbClient {
     database: string,
     collection: string,
     connectionInfo: {
-      key?: string,
-      aadCredentials?: ChainedTokenCredential,
+      key?: string;
+      aadCredentials?: ChainedTokenCredential;
     },
     collectionOptions: Omit<ContainerDefinition, 'id'>,
-    retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS,
+    retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
   ) {
     try {
       // TODO: look into reducing request timeout
@@ -67,7 +66,7 @@ export default class CosmosDbClient {
         endpoint: account,
         connectionPolicy,
         consistencyLevel: 'Session',
-        ...connectionInfo,
+        ...connectionInfo
       });
       const { database: db } = await client.databases.createIfNotExists(
         {
@@ -151,8 +150,8 @@ export default class CosmosDbClient {
             sessionToken: this._session
           })
           .fetchAll() as unknown) as FeedResponse<T> & {
-            headers: CosmosHeaders;
-          }
+          headers: CosmosHeaders;
+        }
     );
   }
 
@@ -172,8 +171,8 @@ export default class CosmosDbClient {
             maxItemCount: options.pageSize
           })
           .fetchNext() as unknown) as FeedResponse<T> & {
-            headers: CosmosHeaders;
-          }
+          headers: CosmosHeaders;
+        }
     );
   }
 
@@ -185,7 +184,7 @@ export default class CosmosDbClient {
         sessionToken: this._session
       })
       .getAsyncIterator()
-    [Symbol.asyncIterator]();
+      [Symbol.asyncIterator]();
 
     const modifiedIterator: AsyncIterable<AnnotatedResponse<T[]>> = {
       [Symbol.asyncIterator]: () => ({
