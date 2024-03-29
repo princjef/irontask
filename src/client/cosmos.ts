@@ -47,16 +47,14 @@ export default class CosmosDbClient {
     account: string,
     database: string,
     collection: string,
-    key: string,
+    connectionInfo: {
+      key?: string,
+      aadCredentials?: ChainedTokenCredential,
+    },
     collectionOptions: Omit<ContainerDefinition, 'id'>,
     retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS,
-    managedIdentity?: ChainedTokenCredential,
   ) {
     try {
-      // If managed identity is available, use that authentication model.
-      // Otherwise default to the secret key.
-      const authModel: Partial<CosmosClientOptions> = managedIdentity ? { aadCredentials: managedIdentity } : { key };
-    
       // TODO: look into reducing request timeout
       const connectionPolicy: ConnectionPolicy = {
         retryOptions: {
@@ -69,7 +67,7 @@ export default class CosmosDbClient {
         endpoint: account,
         connectionPolicy,
         consistencyLevel: 'Session',
-        ...authModel,
+        ...connectionInfo,
       });
       const { database: db } = await client.databases.createIfNotExists(
         {
@@ -153,8 +151,8 @@ export default class CosmosDbClient {
             sessionToken: this._session
           })
           .fetchAll() as unknown) as FeedResponse<T> & {
-          headers: CosmosHeaders;
-        }
+            headers: CosmosHeaders;
+          }
     );
   }
 
@@ -174,8 +172,8 @@ export default class CosmosDbClient {
             maxItemCount: options.pageSize
           })
           .fetchNext() as unknown) as FeedResponse<T> & {
-          headers: CosmosHeaders;
-        }
+            headers: CosmosHeaders;
+          }
     );
   }
 
@@ -187,7 +185,7 @@ export default class CosmosDbClient {
         sessionToken: this._session
       })
       .getAsyncIterator()
-      [Symbol.asyncIterator]();
+    [Symbol.asyncIterator]();
 
     const modifiedIterator: AsyncIterable<AnnotatedResponse<T[]>> = {
       [Symbol.asyncIterator]: () => ({
