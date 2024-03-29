@@ -1,12 +1,12 @@
 {
   "name": "irontask",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "irontask",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "license": "MIT",
       "dependencies": {
         "@azure/core-rest-pipeline": "^1.0.0",
