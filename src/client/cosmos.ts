@@ -12,6 +12,7 @@ import {
   CosmosClient,
   CosmosHeaders,
   FeedResponse,
+  ItemDefinition,
   Resource,
   ResourceResponse,
   Response,
@@ -114,13 +115,15 @@ export default class CosmosDbClient {
     return url.resolve(this._endpoint, this._client.item(id, partition).url);
   }
 
-  async createItem<T>(document: T): Promise<AnnotatedResponse<T & Resource>> {
+  async createItem<T extends ItemDefinition>(
+    document: T
+  ): Promise<AnnotatedResponse<T & Resource>> {
     return await this._wrap(async () =>
       this._client.items.create<T>(document, { sessionToken: this._session })
     );
   }
 
-  async getItem<T>(
+  async getItem<T extends ItemDefinition>(
     id: string,
     partition: string
   ): Promise<AnnotatedResponse<(T & Resource) | undefined>> {
@@ -132,7 +135,7 @@ export default class CosmosDbClient {
       } catch (err) {
         if (CosmosDbClient._isCosmosError(err, 404)) {
           return {
-            headers: err.headers,
+            headers: (err as any).headers,
             body: undefined
           };
         }
@@ -236,7 +239,7 @@ export default class CosmosDbClient {
       } catch (err) {
         if (CosmosDbClient._isCosmosError(err, 404)) {
           return {
-            headers: err.headers,
+            headers: (err as any).headers,
             result: undefined
           };
         }

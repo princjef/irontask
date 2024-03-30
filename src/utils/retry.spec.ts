@@ -63,7 +63,7 @@ describe('#retry', () => {
       await retry(mock, err => err.message === 'retryable');
       throw new Error('should have thrown');
     } catch (err) {
-      expect(err.message).toEqual('not retryable');
+      expect((err as any).message).toEqual('not retryable');
       expect(mock).toHaveBeenCalledTimes(2);
     }
   });
