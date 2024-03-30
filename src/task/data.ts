@@ -18,7 +18,7 @@ import { ResolvedTaskDocument } from './document';
 import taskStatus, { isFinished } from './status';
 import { SerializedTask, TaskBase, TaskStatus } from './types';
 
-declare interface TaskData<T> {
+declare interface TaskData<T extends unknown> {
   on(event: 'updated', listener: () => void): this;
 }
 
@@ -226,8 +226,8 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
       // the operation because that's the state from which the payload
       // changes were intended (even if additional changes come in later).
       const payloadPatch = jsonpatch.generate(
-        this._referencePayload,
-        this.payload
+        this._referencePayload as any,
+        this.payload as any
       );
       return await this._patchInternal(changes, highPriority, payloadPatch);
     } finally {
