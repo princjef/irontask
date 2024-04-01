@@ -28,8 +28,7 @@
     "clean": "rimraf dist",
     "format": "prettier --write --loglevel warn \"src/**/*.ts\" \"*.md\"",
     "format:verify": "prettier --check --loglevel warn \"src/**/*.ts\" \"*.md\"",
-    "lint": "tslint --project tsconfig.json --fix",
-    "lint:verify": "tslint --project tsconfig.json",
+    "lint": "eslint -c .eslintrc.js --fix --ext .ts src",
     "prebuild": "npm run clean && npm run format && npm run lint",
     "build": "tsc",
     "prebuild:verify": "npm run clean && npm run format:verify && npm run lint:verify",
@@ -46,7 +45,6 @@
     "release": "semantic-release"
   },
   "dependencies": {
-    "@azure/core-rest-pipeline": "^1.0.0",
     "@azure/cosmos": "^3.6.3",
     "@azure/identity": "^4.0",
     "cron-parser": "^2.17.0",
@@ -70,7 +68,14 @@
     "@types/node": "^8.10.60",
     "@types/retry": "^0.12.0",
     "@types/uuid": "^7.0.3",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
+    "@typescript-eslint/parser": "^7.4.0",
     "commitlint-azure-pipelines-cli": "^1.0.3",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-unicorn": "^51.0.1",
     "husky": "^3.1.0",
     "jest": "^26.0.0",
     "jest-junit": "^10.0.0",
@@ -80,7 +85,7 @@
     "rimraf": "^3.0.2",
     "semantic-release": "^17.0.7",
     "ts-jest": "^26.0.0",
-    "tslint": "^5.20.1",
+    "tslint": "^6.0.0",
     "typescript": "^4.5.0"
   },
   "files": [

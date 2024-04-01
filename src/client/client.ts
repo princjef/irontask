@@ -3,6 +3,11 @@
  * Licensed under the MIT License.
  */
 
+/* !
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 import { SqlQuerySpec } from '@azure/cosmos';
 import { ChainedTokenCredential } from '@azure/identity';
 import { v4 as uuid } from 'uuid';
@@ -68,6 +73,40 @@ if (!Symbol.asyncIterator) {
  * @public
  */
 export default class TaskClient {
+  private _client: CosmosDbClient;
+  private _options: Required<TaskClientOptions>;
+  private _interceptor: InterceptorProcessor;
+
+  /**
+   * Create a client using a pre-initialized Azure Cosmos DB client. Usage of
+   * this API is only recommended for advanced users. Most users should use
+   * the TaskClient.create method instead.
+   *
+   * @param cosmosClient    - Client created from a {@link
+   *                          @azure/cosmos#Container} that is scoped to the
+   *                          collection/container that the tasks client
+   *                          should use.
+   * @param options         - Client creation options
+   *
+   * @internal
+   */
+  private constructor(
+    cosmosClient: CosmosDbClient,
+    options?: TaskClientOptions
+  ) {
+    this._client = cosmosClient;
+    this._options = {
+      lockDurationMs: 30000,
+      maxExecutionTimeMs: 30 * 60 * 1000,
+      pollIntervalMs: 5000,
+      maxUpdateParallelism: 10,
+      interceptors: {},
+      retries: INTERNAL_RETRY_OPTIONS,
+      ...options
+    };
+    this._interceptor = new InterceptorProcessor(this._options.interceptors);
+  }
+
   /**
    * Initializes a task client using the provided account information,
    * creating the specified database and collection if necessary.
@@ -107,40 +146,6 @@ export default class TaskClient {
     const taskClient = new TaskClient(cosmosClient, options);
     await taskClient.registerSprocs();
     return taskClient;
-  }
-
-  private _client: CosmosDbClient;
-  private _options: Required<TaskClientOptions>;
-  private _interceptor: InterceptorProcessor;
-
-  /**
-   * Create a client using a pre-initialized Azure Cosmos DB client. Usage of
-   * this API is only recommended for advanced users. Most users should use
-   * the TaskClient.create method instead.
-   *
-   * @param cosmosClient    - Client created from a {@link
-   *                          @azure/cosmos#Container} that is scoped to the
-   *                          collection/container that the tasks client
-   *                          should use.
-   * @param options         - Client creation options
-   *
-   * @internal
-   */
-  private constructor(
-    cosmosClient: CosmosDbClient,
-    options?: TaskClientOptions
-  ) {
-    this._client = cosmosClient;
-    this._options = {
-      lockDurationMs: 30000,
-      maxExecutionTimeMs: 30 * 60 * 1000,
-      pollIntervalMs: 5000,
-      maxUpdateParallelism: 10,
-      interceptors: {},
-      retries: INTERNAL_RETRY_OPTIONS,
-      ...options
-    };
-    this._interceptor = new InterceptorProcessor(this._options.interceptors);
   }
 
   /**
@@ -345,7 +350,7 @@ export default class TaskClient {
                 doc as ResolvedTaskDocument<T>
               )
             ),
-            response.continuation!
+            response.continuation
           )
         };
       }
@@ -1021,35 +1026,39 @@ export default class TaskClient {
       async () => {
         let ruConsumption = 0;
 
-        await Array.from(Object.values(sprocs)).map(async ({ id, fn }) => {
-          try {
-            const result = await this._client.replaceSproc(id, fn);
-            ruConsumption += result.ruConsumption || 0;
-          } catch (err) {
-            // 404 means we need to create it
-            if (IronTaskError.is(err, ErrorCode.DATABASE_RESOURCE_NOT_FOUND)) {
-              try {
-                const result = await this._client.createSproc(id, fn);
-                ruConsumption += result.ruConsumption || 0;
-              } catch (err) {
-                // 409s are okay at this point. Just means we
-                // were in a race with something else
-                if (
-                  IronTaskError.is(
-                    err,
-                    ErrorCode.DATABASE_RESOURCE_ALREADY_EXISTS
-                  )
-                ) {
-                  return;
-                }
+        void (await Array.from(Object.values(sprocs)).map(
+          async ({ id, fn }) => {
+            try {
+              const result = await this._client.replaceSproc(id, fn);
+              ruConsumption += result.ruConsumption || 0;
+            } catch (err) {
+              // 404 means we need to create it
+              if (
+                IronTaskError.is(err, ErrorCode.DATABASE_RESOURCE_NOT_FOUND)
+              ) {
+                try {
+                  const result = await this._client.createSproc(id, fn);
+                  ruConsumption += result.ruConsumption || 0;
+                } catch (err) {
+                  // 409s are okay at this point. Just means we
+                  // were in a race with something else
+                  if (
+                    IronTaskError.is(
+                      err,
+                      ErrorCode.DATABASE_RESOURCE_ALREADY_EXISTS
+                    )
+                  ) {
+                    return;
+                  }
 
+                  throw err;
+                }
+              } else {
                 throw err;
               }
-            } else {
-              throw err;
             }
           }
-        });
+        ));
 
         return {
           ruConsumption,
@@ -1081,7 +1090,7 @@ export default class TaskClient {
         // have to know/care that we are creating task instances and
         // running the operation on them.
         const interceptor = new InterceptorProcessor({
-          async task(context, next) {
+          task: async (context, next) => {
             // Allow all operations to execute
             await next();
 
