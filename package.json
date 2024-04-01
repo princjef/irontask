@@ -28,7 +28,7 @@
     "clean": "rimraf dist",
     "format": "prettier --write --loglevel warn \"src/**/*.ts\" \"*.md\"",
     "format:verify": "prettier --check --loglevel warn \"src/**/*.ts\" \"*.md\"",
-    "lint": "eslint -c .eslintrc.js --fix --ext .ts src",
+    "lint": "eslint -c .eslintrc.js --ext .ts src",
     "prebuild": "npm run clean && npm run format && npm run lint",
     "build": "tsc",
     "prebuild:verify": "npm run clean && npm run format:verify && npm run lint:verify",
