@@ -1,6 +1,8 @@
 # [2.0.0](https://github.com/princjef/irontask/compare/v1.5.0...v2.0.0) (2024-3-29)
 
-* add support for managed identities as an alternative to secret key authentication -- cosmos client create signiture changes as a result
+### Security Additions
+
+* add support for managed identities as an alternative to secret key authentication -- cosmos client create signiture changes as a result.
 
 # [1.5.0](https://github.com/princjef/irontask/compare/v1.4.1...v1.5.0) (2020-11-04)
 
