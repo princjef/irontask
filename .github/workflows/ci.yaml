@@ -1,0 +1,91 @@
+name: 'Continuous Integration'
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Lint
+        uses: wagoid/commitlint-github-action@v6
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CosmosDB Emulator Docker
+        run: |
+          docker rm -f emulator
+          docker pull mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+          docker run --name emulator --publish 8081:8081 --publish 10250-10255:10250-10255 -d -it -e AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1 -e AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+          timeout 60 docker logs emulator --follow || true
+          while ! curl -k https://localhost:8081/_explorer/index.html
+          do
+            if ! docker logs emulator | grep 'Shutting Down'; then
+              echo "Emulator is not running yet. Waiting 5 seconds..."
+              sleep 5
+            else
+              echo "Emulator shut down unexpectedly, restarting"
+              docker rm -f emulator
+              docker run --name emulator --publish 8081:8081 --publish 10250-10255:10250-10255 -d -it -e AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1 -e AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+              timeout 60 docker logs emulator --follow || true
+            fi
+          done
+          echo "Emulator is running"
+        timeout-minutes: 10
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: '0'
+          COSMOS_ACCOUNT: https://localhost:8081
+          COSMOS_DATABASE: ci
+          # Hardcoded emulator key. Not a real secret
+          COSMOS_KEY: C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==
+      - name: Report coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: princjef/irontask
+          files: coverage/cobertura-coverage.xml
+  publish:
+    runs-on: ubuntu-latest
+    needs:
+      - commitlint
+      - test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Publish to NPM
+        run: npm run release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
