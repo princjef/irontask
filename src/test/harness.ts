@@ -8,6 +8,7 @@ import * as url from 'url';
 import { v4 as uuid } from 'uuid';
 
 import { TaskClient, TaskClientOptions } from '..';
+import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
 
 export default async function initialize(options?: TaskClientOptions) {
   const account = process.env.COSMOS_ACCOUNT;
@@ -31,16 +32,34 @@ export default async function initialize(options?: TaskClientOptions) {
     );
   }
 
+  const useAadAuth = process.env.USE_AAD_AUTH;
+  if (!key) {
+    throw new Error(
+      'Missing key. Make sure you have set the USE_AAD_AUTH environment variable'
+    );
+  }
+
   // Dynamic collection for testing
   const collection = `irontask-${uuid()}`;
 
-  const client = await TaskClient.create(
-    account,
-    database,
-    collection,
-    { key },
-    options
-  );
+  let client: TaskClient;
+  if (useAadAuth) {
+    client = await TaskClient.createFromCredential(
+      account,
+      database,
+      collection,
+      new ChainedTokenCredential(new AzureCliCredential()),
+      options
+    );
+  } else {
+    client = await TaskClient.createFromKey(
+      account,
+      database,
+      collection,
+      key,
+      options
+    );
+  }
 
   return {
     client,

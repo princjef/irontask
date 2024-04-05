@@ -94,11 +94,11 @@ export default class CosmosDbClient {
         endpoint: account,
         connectionPolicy,
         consistencyLevel: 'Session',
-        aadCredentials,
+        aadCredentials
       }),
       collectionOptions,
-      retryOptions,
-    )
+      retryOptions
+    );
   }
 
   static async createFromKey(
@@ -125,11 +125,11 @@ export default class CosmosDbClient {
         endpoint: account,
         connectionPolicy,
         consistencyLevel: 'Session',
-        key,
+        key
       }),
       collectionOptions,
-      retryOptions,
-    )
+      retryOptions
+    );
   }
 
   static getErrorRU(err: any): number | undefined {

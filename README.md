@@ -55,12 +55,22 @@ const util = require('util');
 
 async function main() {
   // Set up the client
-  const client = await TaskClient.create(
+  const client = await TaskClient.createFromKey(
     'https://your-cosmos-account.documents.azure.com:443/',
     'your-cosmos-database',
     'your-cosmos-collection', // Will be created if it doesn't exist
     'base64-encoded key'
   );
+
+  /*
+   *  // Alternatively initialize the client with a managed identity.
+   *  const client = await TaskClient.createFromKey(
+   *    'https://your-cosmos-account.documents.azure.com:443/',
+   *    'your-cosmos-database',
+   *    'your-cosmos-collection', // Will be created if it doesn't exist
+   *    new ChainedTokenCredential(...) // From @azure/identity library.
+   *  );
+   */
 
   // Create a task that runs once
   const task = await client.create('sample-task', { hello: 'world' });
@@ -104,7 +114,7 @@ Let's break down what's going on in here:
 Before we get going, we need a client to work with.
 
 ```js
-const client = await TaskClient.create(
+const client = await TaskClient.createFromKey(
   'https://your-cosmos-account.documents.azure.com:443/',
   'your-cosmos-database', // Will be created if it doesn't exist
   'your-cosmos-collection', // Will be created if it doesn't exist
