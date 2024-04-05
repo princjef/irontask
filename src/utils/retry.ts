@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { timeouts } from 'retry';
+import * as ret from 'retry';
 
 import { INTERNAL_RETRY_OPTIONS } from '../constants';
 import { TimeoutsOptions } from '../types/public';
@@ -26,7 +26,7 @@ export default async function retry<T>(
   shouldRetry: (err: any) => boolean = () => true,
   options: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
 ): Promise<T> {
-  const delays = timeouts(options);
+  const delays = ret.timeouts(options);
   for (const [index, timeout] of delays.entries()) {
     try {
       // Attempt the operation

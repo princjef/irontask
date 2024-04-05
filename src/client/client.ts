@@ -120,7 +120,7 @@ export default class TaskClient {
     account: string,
     database: string,
     collection: string,
-    aadCredentials: ChainedTokenCredential;
+    aadCredentials: ChainedTokenCredential,
     options?: TaskClientOptions
   ) {
     const cosmosClient = await CosmosDbClient.createFromCredential(
@@ -1056,7 +1056,7 @@ export default class TaskClient {
       async () => {
         let ruConsumption = 0;
 
-        (await Array.from(Object.values(sprocs)).map(
+        void (await Array.from(Object.values(sprocs)).map(
           async ({ id, fn }) => {
             try {
               const result = await this._client.replaceSproc(id, fn);

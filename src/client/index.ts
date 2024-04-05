@@ -8,10 +8,5 @@ import CosmosDbClient from './cosmos';
 import { Listener } from './listener';
 import ScopedTaskClient from './scoped';
 
-export {
-  CosmosDbClient,
-  Listener,
-  ScopedTaskClient,
-  TaskClient
-};
+export { CosmosDbClient, Listener, ScopedTaskClient, TaskClient };
 export * from './types';

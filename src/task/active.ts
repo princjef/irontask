@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { createTimeout } from 'retry';
+import * as retry from 'retry';
 import * as util from 'util';
 import { v4 as uuid } from 'uuid';
 
@@ -327,7 +327,7 @@ export default class ActiveTaskImpl<T> extends EventEmitter
         const resolvedDelayMs =
           delayMs !== undefined
             ? delayMs
-            : createTimeout(this.attempts, this._options.retries);
+            : retry.createTimeout(this.attempts, this._options.retries);
 
         return await this._acknowledge(
           ProcessingResult.Retry,
