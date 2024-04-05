@@ -36,7 +36,6 @@ const ERROR_RU = Symbol('CosmosDB Error RU');
 
 const retryableNetworkingErrors = ['ECONNREFUSED', 'EAI_AGAIN'];
 
-export { ChainedTokenCredential };
 export default class CosmosDbClient {
   private _endpoint: string;
   private _client: Container;
@@ -47,28 +46,11 @@ export default class CosmosDbClient {
     account: string,
     database: string,
     collection: string,
-    connectionInfo: {
-      key?: string;
-      aadCredentials?: ChainedTokenCredential;
-    },
+    client: CosmosClient,
     collectionOptions: Omit<ContainerDefinition, 'id'>,
     retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
   ) {
     try {
-      // TODO: look into reducing request timeout
-      const connectionPolicy: ConnectionPolicy = {
-        retryOptions: {
-          maxRetryAttemptCount: 0,
-          fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
-          maxWaitTimeInSeconds: 1000 // Just to make types happy
-        }
-      };
-      const client = new CosmosClient({
-        endpoint: account,
-        connectionPolicy,
-        consistencyLevel: 'Session',
-        ...connectionInfo
-      });
       const { database: db } = await client.databases.createIfNotExists(
         {
           id: database
@@ -86,6 +68,68 @@ export default class CosmosDbClient {
     } catch (err) {
       throw CosmosDbClient._translateError(err);
     }
+  }
+
+  static async createFromCredential(
+    account: string,
+    database: string,
+    collection: string,
+    aadCredentials: ChainedTokenCredential,
+    collectionOptions: Omit<ContainerDefinition, 'id'>,
+    retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
+  ) {
+    // TODO: look into reducing request timeout
+    const connectionPolicy: ConnectionPolicy = {
+      retryOptions: {
+        maxRetryAttemptCount: 0,
+        fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
+        maxWaitTimeInSeconds: 1000 // Just to make types happy
+      }
+    };
+    return await CosmosDbClient.create(
+      account,
+      database,
+      collection,
+      new CosmosClient({
+        endpoint: account,
+        connectionPolicy,
+        consistencyLevel: 'Session',
+        aadCredentials,
+      }),
+      collectionOptions,
+      retryOptions,
+    )
+  }
+
+  static async createFromKey(
+    account: string,
+    database: string,
+    collection: string,
+    key: string,
+    collectionOptions: Omit<ContainerDefinition, 'id'>,
+    retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
+  ) {
+    // TODO: look into reducing request timeout
+    const connectionPolicy: ConnectionPolicy = {
+      retryOptions: {
+        maxRetryAttemptCount: 0,
+        fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
+        maxWaitTimeInSeconds: 1000 // Just to make types happy
+      }
+    };
+    return await CosmosDbClient.create(
+      account,
+      database,
+      collection,
+      new CosmosClient({
+        endpoint: account,
+        connectionPolicy,
+        consistencyLevel: 'Session',
+        key,
+      }),
+      collectionOptions,
+      retryOptions,
+    )
   }
 
   static getErrorRU(err: any): number | undefined {

@@ -106,6 +106,44 @@ export default class TaskClient {
    * Initializes a task client using the provided account information,
    * creating the specified database and collection if necessary.
    *
+   * @param account         - Azure Cosmos DB account url
+   * @param database        - Azure Cosmos DB database name
+   * @param collection      - Azure Cosmos DB collection/container name
+   * @param aadCredentials  - Azure Identity Library ChainedTokenCredential
+   * @param options         - Client creation options
+   *
+   * @returns Promise containing the initialized client
+   *
+   * @public
+   */
+  static async createFromCredential(
+    account: string,
+    database: string,
+    collection: string,
+    aadCredentials: ChainedTokenCredential;
+    options?: TaskClientOptions
+  ) {
+    const cosmosClient = await CosmosDbClient.createFromCredential(
+      account,
+      database,
+      collection,
+      aadCredentials,
+      {
+        partitionKey: {
+          paths: ['/config/type']
+        },
+        defaultTtl: -1
+      }
+    );
+    const taskClient = new TaskClient(cosmosClient, options);
+    await taskClient.registerSprocs();
+    return taskClient;
+  }
+
+  /**
+   * Initializes a task client using the provided account information,
+   * creating the specified database and collection if necessary.
+   *
    * @param account     - Azure Cosmos DB account url
    * @param database    - Azure Cosmos DB database name
    * @param collection  - Azure Cosmos DB collection/container name
@@ -116,21 +154,18 @@ export default class TaskClient {
    *
    * @public
    */
-  static async create(
+  static async createFromKey(
     account: string,
     database: string,
     collection: string,
-    connectionInfo: {
-      key?: string;
-      aadCredentials?: ChainedTokenCredential;
-    },
+    key: string,
     options?: TaskClientOptions
   ) {
-    const cosmosClient = await CosmosDbClient.create(
+    const cosmosClient = await CosmosDbClient.createFromKey(
       account,
       database,
       collection,
-      connectionInfo,
+      key,
       {
         partitionKey: {
           paths: ['/config/type']
@@ -1021,7 +1056,7 @@ export default class TaskClient {
       async () => {
         let ruConsumption = 0;
 
-        void (await Array.from(Object.values(sprocs)).map(
+        (await Array.from(Object.values(sprocs)).map(
           async ({ id, fn }) => {
             try {
               const result = await this._client.replaceSproc(id, fn);
