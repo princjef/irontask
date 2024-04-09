@@ -16,7 +16,7 @@ import {
   Response,
   SqlQuerySpec
 } from '@azure/cosmos';
-import { ChainedTokenCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
 import * as url from 'url';
 
 import {
@@ -36,13 +36,22 @@ const ERROR_RU = Symbol('CosmosDB Error RU');
 
 const retryableNetworkingErrors = ['ECONNREFUSED', 'EAI_AGAIN'];
 
+// TODO: look into reducing request timeout
+const connectionPolicy: ConnectionPolicy = {
+  retryOptions: {
+    maxRetryAttemptCount: 0,
+    fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
+    maxWaitTimeInSeconds: 1000 // Just to make types happy
+  }
+};
+
 export default class CosmosDbClient {
   private _endpoint: string;
   private _client: Container;
   private _session?: string;
   private _retryOptions: TimeoutsOptions;
 
-  static async create(
+  private static async create(
     account: string,
     database: string,
     collection: string,
@@ -74,18 +83,10 @@ export default class CosmosDbClient {
     account: string,
     database: string,
     collection: string,
-    aadCredentials: ChainedTokenCredential,
+    aadCredentials: TokenCredential,
     collectionOptions: Omit<ContainerDefinition, 'id'>,
     retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
   ) {
-    // TODO: look into reducing request timeout
-    const connectionPolicy: ConnectionPolicy = {
-      retryOptions: {
-        maxRetryAttemptCount: 0,
-        fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
-        maxWaitTimeInSeconds: 1000 // Just to make types happy
-      }
-    };
     return await CosmosDbClient.create(
       account,
       database,
@@ -109,14 +110,6 @@ export default class CosmosDbClient {
     collectionOptions: Omit<ContainerDefinition, 'id'>,
     retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
   ) {
-    // TODO: look into reducing request timeout
-    const connectionPolicy: ConnectionPolicy = {
-      retryOptions: {
-        maxRetryAttemptCount: 0,
-        fixedRetryIntervalInMilliseconds: 1000, // Just to make types happy
-        maxWaitTimeInSeconds: 1000 // Just to make types happy
-      }
-    };
     return await CosmosDbClient.create(
       account,
       database,

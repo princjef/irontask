@@ -4,7 +4,7 @@
  */
 
 import { SqlQuerySpec } from '@azure/cosmos';
-import { ChainedTokenCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -109,7 +109,7 @@ export default class TaskClient {
    * @param account         - Azure Cosmos DB account url
    * @param database        - Azure Cosmos DB database name
    * @param collection      - Azure Cosmos DB collection/container name
-   * @param aadCredentials  - Azure Identity Library ChainedTokenCredential
+   * @param aadCredentials  - Azure Identity Library TokenCredential
    * @param options         - Client creation options
    *
    * @returns Promise containing the initialized client
@@ -120,7 +120,7 @@ export default class TaskClient {
     account: string,
     database: string,
     collection: string,
-    aadCredentials: ChainedTokenCredential,
+    aadCredentials: TokenCredential,
     options?: TaskClientOptions
   ) {
     const cosmosClient = await CosmosDbClient.createFromCredential(
@@ -1056,7 +1056,7 @@ export default class TaskClient {
       async () => {
         let ruConsumption = 0;
 
-        void (await Array.from(Object.values(sprocs)).map(
+        Promise.all(await Array.from(Object.values(sprocs)).map(
           async ({ id, fn }) => {
             try {
               const result = await this._client.replaceSproc(id, fn);
