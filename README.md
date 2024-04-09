@@ -64,7 +64,7 @@ async function main() {
 
   /*
    *  // Alternatively initialize the client with a managed identity.
-   *  const client = await TaskClient.createFromKey(
+   *  const client = await TaskClient.createFromCredential(
    *    'https://your-cosmos-account.documents.azure.com:443/',
    *    'your-cosmos-database',
    *    'your-cosmos-collection', // Will be created if it doesn't exist
