@@ -1056,7 +1056,7 @@ export default class TaskClient {
       async () => {
         let ruConsumption = 0;
 
-        Promise.all(
+        await Promise.all(
           await Array.from(Object.values(sprocs)).map(async ({ id, fn }) => {
             try {
               const result = await this._client.replaceSproc(id, fn);
