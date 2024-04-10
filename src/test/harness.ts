@@ -4,11 +4,11 @@
  */
 
 import { CosmosClient } from '@azure/cosmos';
+import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
 import * as url from 'url';
 import { v4 as uuid } from 'uuid';
 
 import { TaskClient, TaskClientOptions } from '..';
-import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
 
 export default async function initialize(options?: TaskClientOptions) {
   const account = process.env.COSMOS_ACCOUNT;
