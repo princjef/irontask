@@ -3,8 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import { CosmosClient } from '@azure/cosmos';
 import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
+import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as url from 'url';
 import { v4 as uuid } from 'uuid';
 
@@ -25,33 +25,38 @@ export default async function initialize(options?: TaskClientOptions) {
     );
   }
 
-  const key = process.env.COSMOS_KEY;
-  if (!key) {
-    throw new Error(
-      'Missing key. Make sure you have set the COSMOS_KEY environment variable'
-    );
-  }
-
-  const useAadAuth = process.env.USE_AAD_AUTH;
-  if (!key) {
-    throw new Error(
-      'Missing key. Make sure you have set the USE_AAD_AUTH environment variable'
-    );
-  }
-
   // Dynamic collection for testing
   const collection = `irontask-${uuid()}`;
 
   let client: TaskClient;
+  let cosmosOptions: Partial<CosmosClientOptions>;
+
+  const useAadAuth = process.env.USE_AAD_AUTH;
   if (useAadAuth) {
+    const credential = new ChainedTokenCredential(new AzureCliCredential());
+    cosmosOptions = {
+      aadCredentials: credential,
+    };
+
     client = await TaskClient.createFromCredential(
       account,
       database,
       collection,
-      new ChainedTokenCredential(new AzureCliCredential()),
+      credential,
       options
     );
   } else {
+    const key = process.env.COSMOS_KEY;
+    if (!key) {
+      throw new Error(
+        'Missing key. Make sure you have set the COSMOS_KEY environment variable'
+      );
+    }
+
+    cosmosOptions = {
+      key,
+    };
+
     client = await TaskClient.createFromKey(
       account,
       database,
@@ -71,7 +76,7 @@ export default async function initialize(options?: TaskClientOptions) {
       new (TaskClient as any)((client as any)._client, options),
     containerRef: url.resolve(account, `/dbs/${database}/colls/${collection}`),
     cleanup: async () => {
-      const client = new CosmosClient({ endpoint: account, key });
+      const client = new CosmosClient({ endpoint: account, ...cosmosOptions });
       await client
         .database(database)
         .container(collection)
