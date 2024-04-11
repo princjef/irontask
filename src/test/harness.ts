@@ -3,7 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
+import { CosmosDBManagementClient } from '@azure/arm-cosmosdb';
+import { CosmosClient } from '@azure/cosmos';
 import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
 import * as url from 'url';
 import { v4 as uuid } from 'uuid';
@@ -29,7 +30,8 @@ export default async function initialize(options?: TaskClientOptions) {
   const collection = `irontask-${uuid()}`;
 
   let client: TaskClient;
-  let cosmosOptions: Partial<CosmosClientOptions>;
+
+  let cleanup: () => Promise<void>;
 
   const useAadAuth = process.env.USE_AAD_AUTH;
   if (useAadAuth) {
@@ -47,15 +49,30 @@ export default async function initialize(options?: TaskClientOptions) {
       );
     }
 
+    const accountName = process.env.COSMOS_ACCOUNT_NAME;
+    if (!accountName) {
+      throw new Error(
+        'Account name is required when using AAD auth. Please include the COSMOS_ACCOUNT_NAME environment variable. Note that this is different than the COSMOS_ACCOUNT environment variable.'
+      );
+    }
+
     const credential = new ChainedTokenCredential(new AzureCliCredential());
-    cosmosOptions = {
-      aadCredentials: credential
+
+    cleanup = async () => {
+      const client = new CosmosDBManagementClient(credential, subId);
+      await client.sqlResources.beginDeleteSqlContainer(
+        rgName,
+        accountName,
+        database,
+        collection
+      );
     };
 
     client = await TaskClient.createFromCredential(
       subId,
       rgName,
       account,
+      accountName,
       database,
       collection,
       credential,
@@ -69,8 +86,12 @@ export default async function initialize(options?: TaskClientOptions) {
       );
     }
 
-    cosmosOptions = {
-      key
+    cleanup = async () => {
+      const client = new CosmosClient({ endpoint: account, key });
+      await client
+        .database(database)
+        .container(collection)
+        .delete();
     };
 
     client = await TaskClient.createFromKey(
@@ -91,12 +112,6 @@ export default async function initialize(options?: TaskClientOptions) {
     getClient: (options?: TaskClientOptions) =>
       new (TaskClient as any)((client as any)._client, options),
     containerRef: url.resolve(account, `/dbs/${database}/colls/${collection}`),
-    cleanup: async () => {
-      const client = new CosmosClient({ endpoint: account, ...cosmosOptions });
-      await client
-        .database(database)
-        .container(collection)
-        .delete();
-    }
+    cleanup
   };
 }
