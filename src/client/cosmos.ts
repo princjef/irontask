@@ -100,62 +100,43 @@ class ControlPlaneOperationClient {
   }
 
   async createDatabaseIfNotExists(params: SqlDatabaseCreateUpdateParameters) {
-    // try {
-    //   return await this._management.sqlResources.getSqlDatabase(
-    //     this._options.resourceGroupName,
-    //     this._options.accountName,
-    //     this._options.databaseName
-    //   );
-    // } catch (err) {
-    //   return this._management.sqlResources
-    //     .beginCreateUpdateSqlDatabase(
-    //       this._options.resourceGroupName,
-    //       this._options.accountName,
-    //       this._options.databaseName,
-    //       params
-    //     )
-    //     .then(async poller => poller.pollUntilDone());
-    // }
-
-    return this._management.sqlResources
-      .beginCreateUpdateSqlDatabase(
+    try {
+      return await this._management.sqlResources.getSqlDatabase(
         this._options.resourceGroupName,
         this._options.accountName,
-        this._options.databaseName,
-        params
-      )
-      .then(async poller => poller.pollUntilDone());
+        this._options.databaseName
+      );
+    } catch (err) {
+      return this._management.sqlResources
+        .beginCreateUpdateSqlDatabase(
+          this._options.resourceGroupName,
+          this._options.accountName,
+          this._options.databaseName,
+          params
+        )
+        .then(async poller => poller.pollUntilDone());
+    }
   }
 
   async createContainerIfNotExists(params: SqlContainerCreateUpdateParameters) {
-    // try {
-    //   return await this._management.sqlResources.getSqlContainer(
-    //     this._options.resourceGroupName,
-    //     this._options.accountName,
-    //     this._options.databaseName,
-    //     this._options.containerName
-    //   );
-    // } catch (err) {
-    //   return this._management.sqlResources
-    //     .beginCreateUpdateSqlContainer(
-    //       this._options.resourceGroupName,
-    //       this._options.accountName,
-    //       this._options.databaseName,
-    //       this._options.containerName,
-    //       params
-    //     )
-    //     .then(async poller => poller.pollUntilDone());
-    // }
-
-    return this._management.sqlResources
-      .beginCreateUpdateSqlContainer(
+    try {
+      return await this._management.sqlResources.getSqlContainer(
         this._options.resourceGroupName,
         this._options.accountName,
         this._options.databaseName,
-        this._options.containerName,
-        params
-      )
-      .then(async poller => poller.pollUntilDone());
+        this._options.containerName
+      );
+    } catch (err) {
+      return this._management.sqlResources
+        .beginCreateUpdateSqlContainer(
+          this._options.resourceGroupName,
+          this._options.accountName,
+          this._options.databaseName,
+          this._options.containerName,
+          params
+        )
+        .then(async poller => poller.pollUntilDone());
+    }
   }
 
   async createSproc(id: string, body: (...args: any[]) => void) {
@@ -196,8 +177,7 @@ export default class CosmosDbClient {
   static async createFromCredential(
     subscriptionId: string,
     resourceGroupName: string,
-    accountEndpoint: string,
-    account: string,
+    accountName: string,
     database: string,
     collection: string,
     aadCredentials: TokenCredential,
@@ -206,7 +186,7 @@ export default class CosmosDbClient {
   ) {
     try {
       const client = new CosmosClient({
-        endpoint: accountEndpoint,
+        endpoint: this._formatEndpoint(accountName),
         connectionPolicy,
         consistencyLevel: 'Session',
         aadCredentials
@@ -216,7 +196,7 @@ export default class CosmosDbClient {
         storageCredentials: aadCredentials,
         subscriptionId,
         resourceGroupName,
-        accountName: account,
+        accountName,
         databaseName: database,
         containerName: collection
       });
@@ -224,6 +204,9 @@ export default class CosmosDbClient {
       await managementClient.createDatabaseIfNotExists({
         resource: {
           id: database
+        },
+        options: {
+          throughput: DEFAULT_DATABASE_THROUGHPUT
         }
       });
 
@@ -235,7 +218,7 @@ export default class CosmosDbClient {
       });
 
       return new CosmosDbClient(
-        accountEndpoint,
+        this._formatEndpoint(accountName),
         client.database(database).container(collection),
         retryOptions,
         managementClient
@@ -561,8 +544,6 @@ export default class CosmosDbClient {
     // We scrub the error first for sensitive information
     const scrubbedError = CosmosDbClient._scrubError(err);
 
-    // console.error(err);
-
     let code: ErrorCode | undefined;
     switch (scrubbedError && scrubbedError.code) {
       case 400:
@@ -654,6 +635,10 @@ export default class CosmosDbClient {
       ) ||
       (err && retryableNetworkingErrors.includes(err.code))
     );
+  }
+
+  private static _formatEndpoint(accountName: string): string {
+    return `https://${accountName}.documents.azure.com:443/`;
   }
 }
 

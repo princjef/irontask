@@ -12,17 +12,17 @@ import { v4 as uuid } from 'uuid';
 import { TaskClient, TaskClientOptions } from '..';
 
 export default async function initialize(options?: TaskClientOptions) {
-  const account = process.env.COSMOS_ACCOUNT;
-  if (!account) {
-    throw new Error(
-      'Missing account. Make sure you have set the COSMOS_ACCOUNT environment variable'
-    );
-  }
-
   const database = process.env.COSMOS_DATABASE;
   if (!database) {
     throw new Error(
       'Missing database. Make sure you have set the COSMOS_DATABASE environment variable'
+    );
+  }
+
+  const account = process.env.COSMOS_ACCOUNT;
+  if (!account) {
+    throw new Error(
+      'Missing account. Make sure you have set the COSMOS_ACCOUNT environment variable'
     );
   }
 
@@ -52,7 +52,7 @@ export default async function initialize(options?: TaskClientOptions) {
     const accountName = process.env.COSMOS_ACCOUNT_NAME;
     if (!accountName) {
       throw new Error(
-        'Account name is required when using AAD auth. Please include the COSMOS_ACCOUNT_NAME environment variable. Note that this is different than the COSMOS_ACCOUNT environment variable.'
+        'Account name is required when using AAD auth. Please include the COSMOS_ACCOUNT_NAME environment variable. This should not be an endpoint, rather it is the name of the cosmos account.'
       );
     }
 
@@ -71,7 +71,6 @@ export default async function initialize(options?: TaskClientOptions) {
     client = await TaskClient.createFromCredential(
       subId,
       rgName,
-      account,
       accountName,
       database,
       collection,

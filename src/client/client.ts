@@ -121,8 +121,7 @@ export default class TaskClient {
   static async createFromCredential(
     subscriptionId: string,
     resourceGroupName: string,
-    accountEndpoint: string,
-    account: string,
+    accountName: string,
     database: string,
     collection: string,
     aadCredentials: TokenCredential,
@@ -131,8 +130,7 @@ export default class TaskClient {
     const cosmosClient = await CosmosDbClient.createFromCredential(
       subscriptionId,
       resourceGroupName,
-      accountEndpoint,
-      account,
+      accountName,
       database,
       collection,
       aadCredentials,
