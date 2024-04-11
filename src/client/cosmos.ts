@@ -177,7 +177,7 @@ export default class CosmosDbClient {
   static async createFromCredential(
     subscriptionId: string,
     resourceGroupName: string,
-    accountName: string,
+    account: string,
     database: string,
     collection: string,
     aadCredentials: TokenCredential,
@@ -186,7 +186,7 @@ export default class CosmosDbClient {
   ) {
     try {
       const client = new CosmosClient({
-        endpoint: this._formatEndpoint(accountName),
+        endpoint: account,
         connectionPolicy,
         consistencyLevel: 'Session',
         aadCredentials
@@ -196,7 +196,7 @@ export default class CosmosDbClient {
         storageCredentials: aadCredentials,
         subscriptionId,
         resourceGroupName,
-        accountName,
+        accountName: formatAccountName(account),
         databaseName: database,
         containerName: collection
       });
@@ -218,7 +218,7 @@ export default class CosmosDbClient {
       });
 
       return new CosmosDbClient(
-        this._formatEndpoint(accountName),
+        account,
         client.database(database).container(collection),
         retryOptions,
         managementClient
@@ -636,10 +636,6 @@ export default class CosmosDbClient {
       (err && retryableNetworkingErrors.includes(err.code))
     );
   }
-
-  private static _formatEndpoint(accountName: string): string {
-    return `https://${accountName}.documents.azure.com:443/`;
-  }
 }
 
 export interface DocumentBase {
@@ -656,3 +652,6 @@ type ItemRes<T> =
   | Pick<Response<T>, 'headers' | 'result'>;
 
 type Res<T> = ListRes<T> | ItemRes<T>;
+
+export const formatAccountName = (accountEndpoint: string): string =>
+  url.parse(accountEndpoint).host?.split('.')[0] ?? '';

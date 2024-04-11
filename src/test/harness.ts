@@ -10,6 +10,7 @@ import * as url from 'url';
 import { v4 as uuid } from 'uuid';
 
 import { TaskClient, TaskClientOptions } from '..';
+import { formatAccountName } from '../client/cosmos';
 
 export default async function initialize(options?: TaskClientOptions) {
   const database = process.env.COSMOS_DATABASE;
@@ -49,20 +50,13 @@ export default async function initialize(options?: TaskClientOptions) {
       );
     }
 
-    const accountName = process.env.COSMOS_ACCOUNT_NAME;
-    if (!accountName) {
-      throw new Error(
-        'Account name is required when using AAD auth. Please include the COSMOS_ACCOUNT_NAME environment variable. This should not be an endpoint, rather it is the name of the cosmos account.'
-      );
-    }
-
     const credential = new ChainedTokenCredential(new AzureCliCredential());
 
     cleanup = async () => {
       const client = new CosmosDBManagementClient(credential, subId);
       await client.sqlResources.beginDeleteSqlContainer(
         rgName,
-        accountName,
+        formatAccountName(account),
         database,
         collection
       );
@@ -71,7 +65,7 @@ export default async function initialize(options?: TaskClientOptions) {
     client = await TaskClient.createFromCredential(
       subId,
       rgName,
-      accountName,
+      account,
       database,
       collection,
       credential,
