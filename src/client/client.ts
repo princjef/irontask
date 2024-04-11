@@ -106,17 +106,21 @@ export default class TaskClient {
    * Initializes a task client using the provided account information,
    * creating the specified database and collection if necessary.
    *
-   * @param account         - Azure Cosmos DB account url
-   * @param database        - Azure Cosmos DB database name
-   * @param collection      - Azure Cosmos DB collection/container name
-   * @param aadCredentials  - Azure Identity Library TokenCredential
-   * @param options         - Client creation options
+   * @param subscriptionId      - Subscription ID of this cosmos DB
+   * @param resourceGroupName   - Resource Group of this cosmos DC
+   * @param account             - Azure Cosmos DB account url
+   * @param database            - Azure Cosmos DB database name
+   * @param collection          - Azure Cosmos DB collection/container name
+   * @param aadCredentials      - Azure Identity Library TokenCredential
+   * @param options             - Client creation options
    *
    * @returns Promise containing the initialized client
    *
    * @public
    */
   static async createFromCredential(
+    subscriptionId: string,
+    resourceGroupName: string,
     account: string,
     database: string,
     collection: string,
@@ -124,6 +128,8 @@ export default class TaskClient {
     options?: TaskClientOptions
   ) {
     const cosmosClient = await CosmosDbClient.createFromCredential(
+      subscriptionId,
+      resourceGroupName,
       account,
       database,
       collection,

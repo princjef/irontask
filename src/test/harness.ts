@@ -3,8 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
+import { AzureCliCredential, ChainedTokenCredential } from '@azure/identity';
 import * as url from 'url';
 import { v4 as uuid } from 'uuid';
 
@@ -33,12 +33,28 @@ export default async function initialize(options?: TaskClientOptions) {
 
   const useAadAuth = process.env.USE_AAD_AUTH;
   if (useAadAuth) {
+    const subId = process.env.SUBSCRIPTION_ID;
+    if (!subId) {
+      throw new Error(
+        'Subscription ID is required when using AAD auth. Please include the SUBSCRIPTION_ID environment variable.'
+      );
+    }
+
+    const rgName = process.env.RESOURCE_GROUP_NAME;
+    if (!rgName) {
+      throw new Error(
+        'Resource group name is required when using AAD auth. Please include the RESOURCE_GROUP_NAME environment variable.'
+      );
+    }
+
     const credential = new ChainedTokenCredential(new AzureCliCredential());
     cosmosOptions = {
-      aadCredentials: credential,
+      aadCredentials: credential
     };
 
     client = await TaskClient.createFromCredential(
+      subId,
+      rgName,
       account,
       database,
       collection,
@@ -54,7 +70,7 @@ export default async function initialize(options?: TaskClientOptions) {
     }
 
     cosmosOptions = {
-      key,
+      key
     };
 
     client = await TaskClient.createFromKey(

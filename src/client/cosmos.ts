@@ -3,6 +3,7 @@
  * Licensed under the MIT License.
  */
 
+import { CosmosDBManagementClient } from '@azure/arm-cosmosdb';
 import {
   ConnectionPolicy,
   Container,
@@ -45,17 +46,91 @@ const connectionPolicy: ConnectionPolicy = {
   }
 };
 
+interface SprocClient {
+  createSproc(id: string, body: (...args: any[]) => void): Promise<any>;
+  replaceSproc(id: string, body: (...args: any[]) => void): Promise<any>;
+}
+
+class DataPlaneSprocClient {
+  private _client: Container;
+
+  constructor(client: Container) {
+    this._client = client;
+  }
+
+  async createSproc(id: string, body: (...args: any[]) => void) {
+    return this._client.scripts.storedProcedures.create({ id, body });
+  }
+
+  async replaceSproc(id: string, body: (...args: any[]) => void) {
+    return this._client.scripts.storedProcedure(id).replace({ id, body });
+  }
+}
+
+export interface ManagementOptions {
+  storageCredentials: TokenCredential; // credentials to perform management operations against the cosmos account.
+  subscriptionId: string; // the subscription id.
+  resourceGroupName: string; // the resource group name holding the cosmosDB account.
+  accountName: string; // the cosmosDB account.
+  databaseName: string; // the database within the cosmosDB account.
+  containerName: string; // the container within the database.
+}
+
+class ControlPlaneSprocClient {
+  private readonly _management: CosmosDBManagementClient;
+  private readonly _options: ManagementOptions;
+
+  constructor(options: ManagementOptions) {
+    this._management = new CosmosDBManagementClient(
+      options.storageCredentials,
+      options.subscriptionId
+    );
+    this._options = options;
+  }
+
+  async createSproc(id: string, body: (...args: any[]) => void) {
+    return this.createOrUpdate(id, body.toString());
+  }
+
+  async replaceSproc(id: string, body: (...args: any[]) => void) {
+    return this.createOrUpdate(id, body.toString());
+  }
+
+  async createOrUpdate(id: string, body: string) {
+    return this._management.sqlResources
+      .beginCreateUpdateSqlStoredProcedure(
+        this._options.resourceGroupName,
+        this._options.accountName,
+        this._options.databaseName,
+        this._options.containerName,
+        id,
+        {
+          options: {},
+          resource: {
+            id,
+            body
+          }
+        }
+      )
+      .then(async poller => poller.pollUntilDone());
+  }
+}
+
 export default class CosmosDbClient {
   private _endpoint: string;
   private _client: Container;
   private _session?: string;
   private _retryOptions: TimeoutsOptions;
+  private _sprocClient: SprocClient;
 
   private static async create(
     account: string,
     database: string,
     collection: string,
     client: CosmosClient,
+    sprocClientCreator:
+      | ((container: Container) => SprocClient)
+      | (() => SprocClient),
     collectionOptions: Omit<ContainerDefinition, 'id'>,
     retryOptions: TimeoutsOptions = INTERNAL_RETRY_OPTIONS
   ) {
@@ -73,13 +148,20 @@ export default class CosmosDbClient {
         ...collectionOptions
       });
 
-      return new CosmosDbClient(account, container, retryOptions);
+      return new CosmosDbClient(
+        account,
+        container,
+        retryOptions,
+        sprocClientCreator(container)
+      );
     } catch (err) {
       throw CosmosDbClient._translateError(err);
     }
   }
 
   static async createFromCredential(
+    subscriptionId: string,
+    resourceGroupName: string,
     account: string,
     database: string,
     collection: string,
@@ -97,6 +179,15 @@ export default class CosmosDbClient {
         consistencyLevel: 'Session',
         aadCredentials
       }),
+      () =>
+        new ControlPlaneSprocClient({
+          storageCredentials: aadCredentials,
+          subscriptionId,
+          resourceGroupName,
+          accountName: account,
+          databaseName: database,
+          containerName: collection
+        }),
       collectionOptions,
       retryOptions
     );
@@ -120,6 +211,7 @@ export default class CosmosDbClient {
         consistencyLevel: 'Session',
         key
       }),
+      (container: Container) => new DataPlaneSprocClient(container),
       collectionOptions,
       retryOptions
     );
@@ -140,11 +232,13 @@ export default class CosmosDbClient {
   constructor(
     endpoint: string,
     container: Container,
-    retryOptions: TimeoutsOptions
+    retryOptions: TimeoutsOptions,
+    sprocClient: SprocClient
   ) {
     this._endpoint = endpoint;
     this._client = container;
     this._retryOptions = retryOptions;
+    this._sprocClient = sprocClient;
   }
 
   documentRef(partition: string, id: string): string {
@@ -299,24 +393,6 @@ export default class CosmosDbClient {
     );
   }
 
-  async createSproc(
-    id: string,
-    body: (...args: any[]) => void
-  ): Promise<AnnotatedResponse<any>> {
-    return await this._wrap(async () =>
-      this._client.scripts.storedProcedures.create({ id, body })
-    );
-  }
-
-  async replaceSproc(
-    id: string,
-    body: (...args: any[]) => void
-  ): Promise<AnnotatedResponse<any>> {
-    return await this._wrap(async () =>
-      this._client.scripts.storedProcedure(id).replace({ id, body })
-    );
-  }
-
   async executeSproc<T>(
     id: string,
     partition: string,
@@ -324,6 +400,22 @@ export default class CosmosDbClient {
   ): Promise<AnnotatedResponse<T>> {
     return await this._wrap(async () =>
       this._client.scripts.storedProcedure(id).execute<T>(partition, params)
+    );
+  }
+
+  async createSproc(
+    id: string,
+    body: (...args: any[]) => void
+  ): Promise<AnnotatedResponse<any>> {
+    return this._wrap(async () => this._sprocClient.createSproc(id, body));
+  }
+
+  async replaceSproc(
+    id: string,
+    body: (...args: any[]) => void
+  ): Promise<AnnotatedResponse<any>> {
+    return await this._wrap(async () =>
+      this._sprocClient.replaceSproc(id, body)
     );
   }
 
@@ -400,6 +492,8 @@ export default class CosmosDbClient {
   private static _translateError(err: any, ruConsumption?: number) {
     // We scrub the error first for sensitive information
     const scrubbedError = CosmosDbClient._scrubError(err);
+
+    console.error(err);
 
     let code: ErrorCode | undefined;
     switch (scrubbedError && scrubbedError.code) {
