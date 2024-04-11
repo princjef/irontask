@@ -100,43 +100,62 @@ class ControlPlaneOperationClient {
   }
 
   async createDatabaseIfNotExists(params: SqlDatabaseCreateUpdateParameters) {
-    try {
-      return await this._management.sqlResources.getSqlDatabase(
-        this._options.resourceGroupName,
-        this._options.accountName,
-        this._options.databaseName
-      );
-    } catch (err) {
-      return this._management.sqlResources
-        .beginCreateUpdateSqlDatabase(
-          this._options.resourceGroupName,
-          this._options.accountName,
-          this._options.databaseName,
-          params
-        )
-        .then(async poller => poller.pollUntilDone());
-    }
-  }
+    // try {
+    //   return await this._management.sqlResources.getSqlDatabase(
+    //     this._options.resourceGroupName,
+    //     this._options.accountName,
+    //     this._options.databaseName
+    //   );
+    // } catch (err) {
+    //   return this._management.sqlResources
+    //     .beginCreateUpdateSqlDatabase(
+    //       this._options.resourceGroupName,
+    //       this._options.accountName,
+    //       this._options.databaseName,
+    //       params
+    //     )
+    //     .then(async poller => poller.pollUntilDone());
+    // }
 
-  async createContainerIfNotExists(params: SqlContainerCreateUpdateParameters) {
-    try {
-      return await this._management.sqlResources.getSqlContainer(
+    return this._management.sqlResources
+      .beginCreateUpdateSqlDatabase(
         this._options.resourceGroupName,
         this._options.accountName,
         this._options.databaseName,
-        this._options.containerName
-      );
-    } catch (err) {
-      return this._management.sqlResources
-        .beginCreateUpdateSqlContainer(
-          this._options.resourceGroupName,
-          this._options.accountName,
-          this._options.databaseName,
-          this._options.containerName,
-          params
-        )
-        .then(async poller => poller.pollUntilDone());
-    }
+        params
+      )
+      .then(async poller => poller.pollUntilDone());
+  }
+
+  async createContainerIfNotExists(params: SqlContainerCreateUpdateParameters) {
+    // try {
+    //   return await this._management.sqlResources.getSqlContainer(
+    //     this._options.resourceGroupName,
+    //     this._options.accountName,
+    //     this._options.databaseName,
+    //     this._options.containerName
+    //   );
+    // } catch (err) {
+    //   return this._management.sqlResources
+    //     .beginCreateUpdateSqlContainer(
+    //       this._options.resourceGroupName,
+    //       this._options.accountName,
+    //       this._options.databaseName,
+    //       this._options.containerName,
+    //       params
+    //     )
+    //     .then(async poller => poller.pollUntilDone());
+    // }
+
+    return this._management.sqlResources
+      .beginCreateUpdateSqlContainer(
+        this._options.resourceGroupName,
+        this._options.accountName,
+        this._options.databaseName,
+        this._options.containerName,
+        params
+      )
+      .then(async poller => poller.pollUntilDone());
   }
 
   async createSproc(id: string, body: (...args: any[]) => void) {
@@ -205,9 +224,6 @@ export default class CosmosDbClient {
       await managementClient.createDatabaseIfNotExists({
         resource: {
           id: database
-        },
-        options: {
-          throughput: DEFAULT_DATABASE_THROUGHPUT
         }
       });
 
@@ -219,7 +235,7 @@ export default class CosmosDbClient {
       });
 
       return new CosmosDbClient(
-        account,
+        accountEndpoint,
         client.database(database).container(collection),
         retryOptions,
         managementClient
@@ -545,7 +561,7 @@ export default class CosmosDbClient {
     // We scrub the error first for sensitive information
     const scrubbedError = CosmosDbClient._scrubError(err);
 
-    console.error(err);
+    // console.error(err);
 
     let code: ErrorCode | undefined;
     switch (scrubbedError && scrubbedError.code) {
