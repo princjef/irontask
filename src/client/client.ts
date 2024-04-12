@@ -4,6 +4,7 @@
  */
 
 import { SqlQuerySpec } from '@azure/cosmos';
+import { TokenCredential } from '@azure/identity';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -67,44 +68,6 @@ if (!Symbol.asyncIterator) {
  * @public
  */
 export default class TaskClient {
-  /**
-   * Initializes a task client using the provided account information,
-   * creating the specified database and collection if necessary.
-   *
-   * @param account     - Azure Cosmos DB account url
-   * @param database    - Azure Cosmos DB database name
-   * @param collection  - Azure Cosmos DB collection/container name
-   * @param key         - Azure Cosmos DB account key
-   * @param options     - Client creation options
-   *
-   * @returns Promise containing the initialized client
-   *
-   * @public
-   */
-  static async create(
-    account: string,
-    database: string,
-    collection: string,
-    key: string,
-    options?: TaskClientOptions
-  ) {
-    const cosmosClient = await CosmosDbClient.create(
-      account,
-      database,
-      collection,
-      key,
-      {
-        partitionKey: {
-          paths: ['/config/type']
-        },
-        defaultTtl: -1
-      }
-    );
-    const taskClient = new TaskClient(cosmosClient, options);
-    await taskClient.registerSprocs();
-    return taskClient;
-  }
-
   private _client: CosmosDbClient;
   private _options: Required<TaskClientOptions>;
   private _interceptor: InterceptorProcessor;
@@ -137,6 +100,88 @@ export default class TaskClient {
       ...options
     };
     this._interceptor = new InterceptorProcessor(this._options.interceptors);
+  }
+
+  /**
+   * Initializes a task client using the provided account information,
+   * creating the specified database and collection if necessary.
+   *
+   * @param subscriptionId      - Subscription ID of this cosmos DB
+   * @param resourceGroupName   - Resource Group of this cosmos DC
+   * @param account             - Azure Cosmos DB account url
+   * @param database            - Azure Cosmos DB database name
+   * @param collection          - Azure Cosmos DB collection/container name
+   * @param aadCredentials      - Azure Identity Library TokenCredential
+   * @param options             - Client creation options
+   *
+   * @returns Promise containing the initialized client
+   *
+   * @public
+   */
+  static async createFromCredential(
+    subscriptionId: string,
+    resourceGroupName: string,
+    account: string,
+    database: string,
+    collection: string,
+    aadCredentials: TokenCredential,
+    options?: TaskClientOptions
+  ) {
+    const cosmosClient = await CosmosDbClient.createFromCredential(
+      subscriptionId,
+      resourceGroupName,
+      account,
+      database,
+      collection,
+      aadCredentials,
+      {
+        partitionKey: {
+          paths: ['/config/type']
+        },
+        defaultTtl: -1
+      }
+    );
+    const taskClient = new TaskClient(cosmosClient, options);
+    await taskClient.registerSprocs();
+    return taskClient;
+  }
+
+  /**
+   * Initializes a task client using the provided account information,
+   * creating the specified database and collection if necessary.
+   *
+   * @param account     - Azure Cosmos DB account url
+   * @param database    - Azure Cosmos DB database name
+   * @param collection  - Azure Cosmos DB collection/container name
+   * @param key         - Azure Cosmos DB account key
+   * @param options     - Client creation options
+   *
+   * @returns Promise containing the initialized client
+   *
+   * @public
+   */
+  static async createFromKey(
+    account: string,
+    database: string,
+    collection: string,
+    key: string,
+    options?: TaskClientOptions
+  ) {
+    const cosmosClient = await CosmosDbClient.createFromKey(
+      account,
+      database,
+      collection,
+      key,
+      {
+        partitionKey: {
+          paths: ['/config/type']
+        },
+        defaultTtl: -1
+      }
+    );
+    const taskClient = new TaskClient(cosmosClient, options);
+    await taskClient.registerSprocs();
+    return taskClient;
   }
 
   /**
@@ -335,9 +380,13 @@ export default class TaskClient {
           ...response,
           result: this._addContinuation(
             response.result.map(doc =>
-              TaskImpl.create(this._client, this._interceptor, doc)
+              TaskImpl.create(
+                this._client,
+                this._interceptor,
+                doc as ResolvedTaskDocument<T>
+              )
             ),
-            response.continuation!
+            response.continuation
           )
         };
       }
@@ -486,7 +535,11 @@ export default class TaskClient {
           ...response,
           result: this._addContinuation(
             response.result.map(doc =>
-              ReadonlyTaskImpl.create(this._client, this._interceptor, doc)
+              ReadonlyTaskImpl.create(
+                this._client,
+                this._interceptor,
+                doc as ResolvedTaskDocument<T>
+              )
             ),
             response.continuation
           )
@@ -1009,35 +1062,39 @@ export default class TaskClient {
       async () => {
         let ruConsumption = 0;
 
-        await Array.from(Object.values(sprocs)).map(async ({ id, fn }) => {
-          try {
-            const result = await this._client.replaceSproc(id, fn);
-            ruConsumption += result.ruConsumption || 0;
-          } catch (err) {
-            // 404 means we need to create it
-            if (IronTaskError.is(err, ErrorCode.DATABASE_RESOURCE_NOT_FOUND)) {
-              try {
-                const result = await this._client.createSproc(id, fn);
-                ruConsumption += result.ruConsumption || 0;
-              } catch (err) {
-                // 409s are okay at this point. Just means we
-                // were in a race with something else
-                if (
-                  IronTaskError.is(
-                    err,
-                    ErrorCode.DATABASE_RESOURCE_ALREADY_EXISTS
-                  )
-                ) {
-                  return;
-                }
+        await Promise.all(
+          Array.from(Object.values(sprocs)).map(async ({ id, fn }) => {
+            try {
+              const result = await this._client.replaceSproc(id, fn);
+              ruConsumption += result.ruConsumption || 0;
+            } catch (err) {
+              // 404 means we need to create it
+              if (
+                IronTaskError.is(err, ErrorCode.DATABASE_RESOURCE_NOT_FOUND)
+              ) {
+                try {
+                  const result = await this._client.createSproc(id, fn);
+                  ruConsumption += result.ruConsumption || 0;
+                } catch (err) {
+                  // 409s are okay at this point. Just means we
+                  // were in a race with something else
+                  if (
+                    IronTaskError.is(
+                      err,
+                      ErrorCode.DATABASE_RESOURCE_ALREADY_EXISTS
+                    )
+                  ) {
+                    return;
+                  }
 
+                  throw err;
+                }
+              } else {
                 throw err;
               }
-            } else {
-              throw err;
             }
-          }
-        });
+          })
+        );
 
         return {
           ruConsumption,
@@ -1069,7 +1126,7 @@ export default class TaskClient {
         // have to know/care that we are creating task instances and
         // running the operation on them.
         const interceptor = new InterceptorProcessor({
-          async task(context, next) {
+          task: async (context, next) => {
             // Allow all operations to execute
             await next();
 

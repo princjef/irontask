@@ -4,9 +4,8 @@
  */
 
 import { EventEmitter } from 'events';
+import * as retry from 'retry';
 import * as util from 'util';
-
-import { createTimeout } from 'retry';
 import { v4 as uuid } from 'uuid';
 
 import { CosmosDbClient, ListenOptions } from '../client';
@@ -328,7 +327,7 @@ export default class ActiveTaskImpl<T> extends EventEmitter
         const resolvedDelayMs =
           delayMs !== undefined
             ? delayMs
-            : createTimeout(this.attempts, this._options.retries);
+            : retry.createTimeout(this.attempts, this._options.retries);
 
         return await this._acknowledge(
           ProcessingResult.Retry,

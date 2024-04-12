@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { timeouts } from 'retry';
+import * as retry from 'retry';
 
 import { TimeoutsOptions } from './types/public';
 
@@ -11,7 +11,7 @@ export const FUZZ_MS = 500;
 
 // 5 tries spanning about 1 minute
 export const LISTEN_RETRY_TIMEOUTS = Object.freeze(
-  timeouts({
+  retry.timeouts({
     minTimeout: 500,
     maxTimeout: Infinity,
     factor: 4.5,

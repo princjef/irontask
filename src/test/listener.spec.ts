@@ -3,9 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import * as util from 'util';
-
 import moment = require('moment');
+import * as util from 'util';
 
 import TaskClient, {
   ErrorCode,

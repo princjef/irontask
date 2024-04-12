@@ -4,7 +4,6 @@
  */
 
 import { EventEmitter } from 'events';
-
 import { v4 as uuid } from 'uuid';
 
 import { LISTEN_RETRY_TIMEOUTS } from '../constants';

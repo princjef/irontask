@@ -4,7 +4,6 @@
  */
 
 import { EventEmitter } from 'events';
-
 import * as jsonpatch from 'json-merge-patch';
 import cloneDeep = require('lodash.clonedeep');
 import Queue from 'p-queue';
@@ -18,7 +17,7 @@ import { ResolvedTaskDocument } from './document';
 import taskStatus, { isFinished } from './status';
 import { SerializedTask, TaskBase, TaskStatus } from './types';
 
-declare interface TaskData<T> {
+declare interface TaskData<T extends unknown> {
   on(event: 'updated', listener: () => void): this;
 }
 
@@ -226,8 +225,8 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
       // the operation because that's the state from which the payload
       // changes were intended (even if additional changes come in later).
       const payloadPatch = jsonpatch.generate(
-        this._referencePayload,
-        this.payload
+        this._referencePayload as any,
+        this.payload as any
       );
       return await this._patchInternal(changes, highPriority, payloadPatch);
     } finally {
@@ -285,7 +284,7 @@ class TaskData<T> extends EventEmitter implements TaskBase<T> {
                 // case of failure and to maintain the immutability of
                 // the server payload overall.
                 (jsonpatch.apply(
-                  cloneDeep(this._serverPayload!),
+                  cloneDeep(this._serverPayload as object),
                   payloadPatch
                 ) as T)
               : // The document includes the user's payload, but we
