@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/princjef/irontask/compare/v1.5.0...v2.0.0) (2024-04-12)
+
+
+### Features
+
+* add support for managed identities ([#61](https://github.com/princjef/irontask/issues/61)) ([6903aef](https://github.com/princjef/irontask/commit/6903aef85d9d07fbee35be0458d5cfadd9e6ed64))
+
+
+### BREAKING CHANGES
+
+* replaces `TaskClient.create` with `TaskClient.createFromKey` and `TaskClient.createFromCredential`
+
 # [1.5.0](https://github.com/princjef/irontask/compare/v1.4.1...v1.5.0) (2020-11-04)
 
 
