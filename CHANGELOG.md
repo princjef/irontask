@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/princjef/irontask/compare/v2.0.0...v2.1.0) (2024-04-18)
+
+
+### Features
+
+* **deps:** allow @azure/identity v2 and v3 ([#64](https://github.com/princjef/irontask/issues/64)) ([a6eaa69](https://github.com/princjef/irontask/commit/a6eaa69f39993ba64ce9ad28093b0760b0ea00df))
+
 # [2.0.0](https://github.com/princjef/irontask/compare/v1.5.0...v2.0.0) (2024-04-12)
 
 
