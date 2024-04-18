@@ -46,7 +46,7 @@
     "release": "semantic-release"
   },
   "peerDependencies": {
-    "@azure/identity": "^2.0.0 || ^3.0.0"
+    "@azure/identity": "^2.0.0 || ^3.0.0 || ^4.0.0"
   },
   "dependencies": {
     "@azure/arm-cosmosdb": "^15.6.0",
